@@ -376,7 +376,7 @@ static void permission_repair_tests(void)
     int data_fd, result;
 
     snprintf(repair_data_root, sizeof(repair_data_root), "%s/repair-data", directory);
-    snprintf(forever, sizeof(forever), "%s/forever", repair_data_root);
+    snprintf(forever, sizeof(forever), "%s/5team", repair_data_root);
     snprintf(prefix, sizeof(prefix), "%s/prefix", forever);
     snprintf(home, sizeof(home), "%s/home", forever);
     snprintf(cache, sizeof(cache), "%s/radv-shader-cache", forever);
