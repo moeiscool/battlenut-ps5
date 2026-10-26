@@ -4,7 +4,7 @@
 #ifndef FOREVER_PATHS_H
 #define FOREVER_PATHS_H
 
-#define FOREVER_ROOT "/data/forever"
+#define FOREVER_ROOT "/data/5team"
 #define FOREVER_PREFIX FOREVER_ROOT "/prefix"
 #define FOREVER_HOME FOREVER_ROOT "/home"
 #define FOREVER_SHADER_CACHE FOREVER_ROOT "/radv-shader-cache"

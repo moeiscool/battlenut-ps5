@@ -9,7 +9,7 @@
 #define ADDONFORGE_CONTROL_PORT 31980u
 
 #define ADDONFORGE_WAGO_KEY_BYTES 257
-#define ADDONFORGE_WAGO_KEY_FILE "/data/forever/prefix/drive_c/Forever/Addons/wago-key.txt"
+#define ADDONFORGE_WAGO_KEY_FILE "/data/5team/prefix/drive_c/Forever/Addons/wago-key.txt"
 struct addonforge_client
 {
     unsigned short port;

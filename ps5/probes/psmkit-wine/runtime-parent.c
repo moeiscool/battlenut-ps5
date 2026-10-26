@@ -1052,7 +1052,7 @@ void pw_supervisor_wait_children(void)
 #ifdef PW_RUNTIME_B1
 static pthread_mutex_t payload_lock = PTHREAD_MUTEX_INITIALIZER;
 struct payload_drain { pthread_mutex_t lock; int fd; };
-static const char payload_loader[] = "/data/homebrew/PPSA99030/wine/lib/wine/x86_64-unix/wine";
+static const char payload_loader[] = "/data/homebrew/PPSA99031/wine/lib/wine/x86_64-unix/wine";
 
 static int payload_line(int fd, const char *kind, const char *value)
 {
@@ -1185,7 +1185,7 @@ int pw_open_url(const char *url)
     if (!result) result = sceSystemServiceLaunchWebBrowser(url, NULL);
 #if !PW_RUNTIME_HEADLESS
     if (!result)
-        title_desktop_message("Battle.net opened a sign-in page in the PS5 browser.\n"
+        title_desktop_message("Steam opened a sign-in page in the PS5 browser.\n"
                               "Finish there, then press the PS button to come back.");
 #endif
 done:
@@ -1197,7 +1197,7 @@ done:
 int pw_payload_spawn(const char *cmdline, const char *cwd)
 {
     static const char title_root[] = "/app0/";
-    static const char payload_root[] = "/data/homebrew/PPSA99030/";
+    static const char payload_root[] = "/data/homebrew/PPSA99031/";
     char prefix[sizeof(PW_RUNTIME_PREFIX) + sizeof(payload_root)];
     char home[sizeof(PW_RUNTIME_HOME) + sizeof(payload_root)];
     char *command = NULL, *directory = NULL;
@@ -1395,7 +1395,7 @@ static int serve_game_launch(const struct spawn_service *service)
         accepted = !error;
     }
 #endif
-    io_log("b1 supervisor child game launch image=Wow*.exe result=%d argv=REDACTED cwd=REDACTED",
+    io_log("b1 supervisor child game launch image=game result=%d argv=REDACTED cwd=REDACTED",
            (int)error);
     if (io_transfer(service->fd, &error, sizeof(error), 1, io_now_ms() + PW_OVERALL_MS))
         return -1;
@@ -1757,7 +1757,7 @@ static int is_battlenet_renderer(const struct wine_ps5_title_spawn *spawn)
     const char *name = spawn->argv[1];
     for (const char *p = name; *p; p++)
         if (*p == '\\' || *p == '/') name = p + 1;
-    if (strcasecmp(name, "Battle.net.exe")) return 0;
+    if (strcasecmp(name, "Battle.net.exe") && strcasecmp(name, "steamwebhelper.exe")) return 0;
     for (char *const *arg = spawn->argv + 2; *arg; arg++)
         if (!strcmp(*arg, "--type=renderer")) return 1;
     return 0;

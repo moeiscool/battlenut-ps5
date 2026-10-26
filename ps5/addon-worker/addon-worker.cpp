@@ -1,4 +1,4 @@
-// Forever Launcher - bounded native add-on archive worker core.
+// 5team - bounded native add-on archive worker core.
 // Copyright (C) 2026 bizkut
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "addon-worker.hpp"

@@ -435,7 +435,7 @@ static int forever_menu_operation;
 static atomic_int forever_menu_relaunch_pending;
 static atomic_int forever_menu_exit_pending;
 #endif
-/* This start found no initialized Wine prefix in /data/forever: it runs
+/* This start found no initialized Wine prefix in /data/5team: it runs
  * wineboot -i instead of Battle.net, then restarts the app. */
 static int forever_prefix_init;
 static void forever_say(const char *text);
@@ -537,7 +537,7 @@ static int pw_maintenance_direct_game(void)
     {
         io_log("b1 maintenance direct game unavailable channel=%s error=%d; no fallback",
                selector[0] ? selector : "(automatic)", -error);
-        forever_say("Direct start unavailable: the requested WoW channel has no executable and loader pair.");
+        forever_say("Direct start unavailable: the requested game is not installed.");
         return 0;
     }
     error = pw_game_direct_launch(&replay, FOREVER_STATE, &channel, &recorded);
@@ -558,7 +558,7 @@ static int pw_maintenance_direct_game(void)
 
 void pw_parent_request_game_launch(void)
 {
-    io_log("b1 maintenance Play caught image=Wow*.exe argc=%u argv=REDACTED cwd=REDACTED",
+    io_log("b1 maintenance Play caught image=game argc=%u argv=REDACTED cwd=REDACTED",
            game_wire.argc - 7);
     wine_ps5_title_native_request_exit((int)0xc0000120);
 }
@@ -690,7 +690,7 @@ static int pw_child_game_launch(const struct wine_ps5_title_game_launch *launch)
     }
     else error = reply;
     pthread_mutex_unlock(&spawn_lock);
-    io_log("b1 child game launch request image=Wow*.exe result=%d argv=REDACTED cwd=REDACTED", error);
+    io_log("b1 child game launch request image=game result=%d argv=REDACTED cwd=REDACTED", error);
     return error;
 }
 #endif
@@ -1522,12 +1522,12 @@ void __attribute__((noreturn)) pw_native_exit(int status)
     }
     if (atomic_load(&forever_menu_relaunch_pending))
     {
-        io_log("forever: Battle.net reinstall restart; LoadExec path=/app0/eboot.bin");
+        io_log("forever: Steam reinstall restart; LoadExec path=/app0/eboot.bin");
         fflush(NULL);
         int result = sceSystemServiceLoadExec("/app0/eboot.bin", NULL);
-        io_log("forever: Battle.net reinstall LoadExec returned result=%d", result);
-        forever_say("Battle.net was removed, but Forever Launcher could not restart itself.\n"
-                    "Close Forever Launcher and start it again to reinstall Battle.net.");
+        io_log("forever: Steam reinstall LoadExec returned result=%d", result);
+        forever_say("Steam was removed, but 5team could not restart itself.\n"
+                    "Close 5team and start it again to reinstall Steam.");
         b1_wait();
     }
 #endif
@@ -1556,10 +1556,10 @@ void __attribute__((noreturn)) pw_native_exit(int status)
         /* Native libc exit SIGSYS-traps on fw 5.50 (below): keep the reason
          * on screen until the user closes the app. */
         if (!permission_stopped)
-            forever_say(ready ? "Setup finished, but Forever Launcher could not restart itself.\n"
-                                "Close Forever Launcher and start it again."
+            forever_say(ready ? "Setup finished, but 5team could not restart itself.\n"
+                                "Close 5team and start it again."
                               : "Setting up the Windows files did not finish.\n"
-                                "Close Forever Launcher and start it again.");
+                                "Close 5team and start it again.");
         b1_wait();
     }
 #endif
@@ -1617,10 +1617,10 @@ static void b1_download_progress(void *opaque, uint64_t total, uint64_t length)
     if (total / (1024u * 1024u) == *progress && total != length) return;
     *progress = total / (1024u * 1024u);
     if (length)
-        snprintf(message, sizeof(message), "Downloading the Battle.net installer: %.1f of %.1f MB",
+        snprintf(message, sizeof(message), "Downloading the " PW_RUNTIME_LAUNCHER_NAME " installer: %.1f of %.1f MB",
                  (double)total / (1024 * 1024), (double)length / (1024 * 1024));
     else
-        snprintf(message, sizeof(message), "Downloading the Battle.net installer: %.1f MB",
+        snprintf(message, sizeof(message), "Downloading the " PW_RUNTIME_LAUNCHER_NAME " installer: %.1f MB",
                  (double)total / (1024 * 1024));
     b1_message(message);
 }
@@ -1630,7 +1630,7 @@ static void b1_download_progress(void *opaque, uint64_t total, uint64_t length)
 static int b1_download_installer(void)
 {
     static const char *const urls[] = {PW_RUNTIME_INSTALLER_URL, PW_RUNTIME_INSTALLER_FALLBACK_URL};
-    const char *part = PW_RUNTIME_INSTALLER_CWD "/.Battle.net-Setup.exe.part";
+    const char *part = PW_RUNTIME_INSTALLER_UNIX ".part";
     struct forever_https http = {-1, -1, -1, -1};
     int result = 0, complete = 0, logged = 0;
     uint64_t total = 0, length = 0, progress = UINT64_MAX;
@@ -1638,7 +1638,7 @@ static int b1_download_installer(void)
     char message[640], directory[] = PW_RUNTIME_INSTALLER_CWD;
     unsigned int i = 0;
 
-    b1_message("Downloading the Battle.net installer...");
+    b1_message("Downloading the " PW_RUNTIME_LAUNCHER_NAME " installer...");
     for (char *p = directory + 1; ; p++)
     {
         if (*p && *p != '/') continue;
@@ -1652,7 +1652,7 @@ static int b1_download_installer(void)
     if (result) goto done;
     for (i = 0; i < sizeof(urls) / sizeof(urls[0]); i++)
     {
-        if (i) b1_message("Retrying the Battle.net installer download from its direct link...");
+        if (i) b1_message("Retrying the " PW_RUNTIME_LAUNCHER_NAME " installer download from its direct link...");
         struct forever_download download = {
             .url = urls[i], .part = part, .destination = PW_RUNTIME_INSTALLER_UNIX,
             .cap = 256u * 1024u * 1024u, .mz = 1,
@@ -1675,7 +1675,7 @@ done:
         if (!logged)
             io_log("b1 parent installer download failed: %s result=%#x bytes=%llu length=%llu",
                    *step, result, (unsigned long long)total, (unsigned long long)length);
-        snprintf(message, sizeof(message), "Battle.net installer download failed: %s (%#x).\nClose the title and try again.",
+        snprintf(message, sizeof(message), PW_RUNTIME_LAUNCHER_NAME " installer download failed: %s (%#x).\nClose the title and try again.",
                  *step, result);
         b1_message(message);
         return -1;
@@ -1710,7 +1710,7 @@ static void pw_forever_permission_stop(const char *failing_path, const char *rep
     if (forever_permission_message(
             message, sizeof(message), failing_path, repair_root) < 0)
         snprintf(message, sizeof(message),
-                 "Forever Launcher can't write to %s (permission denied).",
+                 "5team can't write to %s (permission denied).",
                  failing_path);
     forever_say(message);
 }
@@ -1739,15 +1739,15 @@ static int pw_forever_sync_managed(void)
     return result;
 }
 
-/* Every start, before Wine: put the user's data in /data/forever (moving an
+/* Every start, before Wine: put the user's data in /data/5team (moving an
  * older in-app prefix there once), write default settings files the user does
- * not have yet, bring the prefix files the app owns up to this version, and
- * install WoW's preset Config.wtf once. 0 to continue, -1 to stop. */
+ * not have yet, and bring the prefix files the app owns up to this version.
+ * 0 to continue, -1 to stop. */
 static int pw_forever_start(void)
 {
     static const char *const legacy[] = {
-        "/data/homebrew/PPSA99030/wine",
-        "/data/prosperostore/previous/PPSA99030/wine",
+        "/data/homebrew/PPSA99031/wine",
+        "/data/prosperostore/previous/PPSA99031/wine",
     };
     static const char *const directories[] = { FOREVER_PREFIX, FOREVER_HOME, FOREVER_SHADER_CACHE };
     static const char *const defaults[][2] = {
@@ -1776,9 +1776,9 @@ static int pw_forever_start(void)
     if (result)
     {
         if (result == -ENOENT || result == -EROFS)
-            snprintf(message, sizeof(message), "Forever Launcher cannot use " FOREVER_ROOT
+            snprintf(message, sizeof(message), "5team cannot use " FOREVER_ROOT
                      " (error %d).\nUpdate ShadowMountPlus to a version that lets apps use /data,\n"
-                     "then start Forever Launcher again.", -result);
+                     "then start 5team again.", -result);
         else
             snprintf(message, sizeof(message), "Could not create " FOREVER_ROOT " (error %d).",
                      -result);
@@ -1873,7 +1873,7 @@ static int pw_forever_start(void)
         }
         forever_prefix_init = 1;
         forever_say("First start: setting up the Windows files.\n"
-                    "This takes a few minutes. Forever Launcher restarts by itself when it is done.");
+                    "This takes a few minutes. 5team restarts by itself when it is done.");
         return 0;
 #endif
     }
@@ -1949,27 +1949,6 @@ static int pw_forever_start(void)
     b1_message("");
 #endif
 
-    result = forever_install_wow_config(FOREVER_APP_SHARE, FOREVER_PREFIX);
-    if (forever_permission_error(result))
-    {
-        repair = pw_forever_restart_broker(FOREVER_PREFIX);
-        if (!repair)
-            result = forever_install_wow_config(FOREVER_APP_SHARE, FOREVER_PREFIX);
-        if (repair || forever_permission_error(result))
-        {
-            pw_forever_permission_stop(FOREVER_PREFIX, FOREVER_PREFIX);
-            return -1;
-        }
-    }
-    io_log("forever: WoW preset Config.wtf %s=%d",
-           result < 0 ? "error" : "installed", result < 0 ? -result : result);
-    if (result < 0)
-    {
-        snprintf(message, sizeof(message), "Could not install WoW's Config.wtf in "
-                 FOREVER_PREFIX " (error %d).", -result);
-        forever_say(message);
-        return -1;
-    }
     return 0;
 }
 
@@ -1990,7 +1969,7 @@ static void *pw_forever_init_watch(void *unused)
         return NULL;
     }
     forever_say("Setting up the Windows files did not finish in 15 minutes.\n"
-                "Close Forever Launcher and start it again.");
+                "Close 5team and start it again.");
     wine_ps5_title_native_request_exit(1);
     return NULL;
 }
@@ -2118,7 +2097,7 @@ static void *forever_voice_download_worker(void *unused)
     (void)unused;
     if (!forever_voice_model_verified())
     {
-        result = forever_mkdirs("/data/forever/voice");
+        result = forever_mkdirs("/data/5team/voice");
         if (!result && !forever_voice_download_canceled(NULL))
             result = forever_https_open(&http, &step);
         if (!result)
@@ -2822,7 +2801,7 @@ void forever_title_addons_yield(void)
     (void)forever_title_addons_action(FOREVER_MENU_COMMAND_ADDONS_CLOSE, 0,
                                      FOREVER_ADDON_INSTALLED, NULL);
     title_desktop_addons_pause(
-        "Add-ons paused to keep Battle.net running. Close and reopen Add-ons to continue.");
+        "Add-ons paused to keep Steam running. Close and reopen Add-ons to continue.");
 }
 
 static void *pw_forever_menu_remove(void *argument)
@@ -2831,7 +2810,7 @@ static void *pw_forever_menu_remove(void *argument)
     int reinstall = command == FOREVER_MENU_COMMAND_REINSTALL;
     int error;
 
-    title_desktop_menu_status("Stopping Battle.net and its update agent...", 0);
+    title_desktop_menu_status("Stopping Steam...", 0);
     error = pw_supervisor_quiesce_children();
 #ifdef FOREVER_MENU_DIAG
     io_log("menu diag action quiesce result=%d", error);
@@ -2840,14 +2819,14 @@ static void *pw_forever_menu_remove(void *argument)
     {
         char message[FOREVER_MENU_STATUS_BYTES];
         snprintf(message, sizeof(message),
-                 "Could not stop every Battle.net process (error %d). Nothing was removed.",
+                 "Could not stop every Steam process (error %d). Nothing was removed.",
                  -error);
         title_desktop_menu_status(message, 1);
         forever_title_menu_finish_lifetime(FOREVER_MENU_TERMINAL_NOTICE);
         return NULL;
     }
-    title_desktop_menu_status(reinstall ? "Removing Battle.net and the cached installer..." :
-                                         "Removing Battle.net and its update agent...", 0);
+    title_desktop_menu_status(reinstall ? "Removing Steam and the cached installer..." :
+                                         "Removing the Steam client...", 0);
     error = 0;
     for (unsigned i = 0; !error && i < 3u + !!reinstall; i++)
     {
@@ -2867,13 +2846,13 @@ static void *pw_forever_menu_remove(void *argument)
         io_log("menu diag action delete index=%u path=%.240s result=%d", i, path, error);
 #endif
     }
-    io_log("forever: Battle.net %s remove result=%d games=kept",
+    io_log("forever: Steam %s remove result=%d games=kept",
            reinstall ? "reinstall" : "uninstall", error);
     if (error)
     {
         char message[FOREVER_MENU_STATUS_BYTES];
         snprintf(message, sizeof(message),
-                 "Could not remove all Battle.net files (error %d). Your games were not touched.",
+                 "Could not remove all Steam files (error %d). Your games were not touched.",
                  -error);
         title_desktop_menu_status(message, 1);
         forever_title_menu_finish_lifetime(FOREVER_MENU_TERMINAL_NOTICE);
@@ -2882,12 +2861,12 @@ static void *pw_forever_menu_remove(void *argument)
     if (!reinstall)
     {
         title_desktop_menu_status(
-            "Battle.net removed. Close and start Forever Launcher to reinstall it.", 1);
+            "Steam removed. Close and start 5team to reinstall it.", 1);
         forever_title_menu_finish_lifetime(FOREVER_MENU_TERMINAL_NOTICE);
         return NULL;
     }
     atomic_store(&forever_menu_relaunch_pending, 1);
-    title_desktop_menu_status("Restarting Forever Launcher to download a fresh installer...", 0);
+    title_desktop_menu_status("Restarting 5team to download a fresh installer...", 0);
     forever_title_menu_finish_lifetime(FOREVER_MENU_REINSTALL_READY);
     wine_ps5_title_native_request_exit(0);
     return NULL;
@@ -2897,7 +2876,7 @@ static void *pw_forever_menu_exit(void *argument)
 {
     int error;
     (void)argument;
-    title_desktop_menu_status("Closing Battle.net...", 0);
+    title_desktop_menu_status("Closing Steam...", 0);
     error = pw_supervisor_quiesce_children();
     io_log("forever: exit quiesce result=%d", error);
     if (error) pw_supervisor_end_children();
@@ -2946,14 +2925,6 @@ int forever_title_menu_action(enum forever_menu_command command, int enabled)
 #endif
         return result;
     case FOREVER_MENU_COMMAND_SET_HDR:
-        result = forever_menu_set_wow_hdr(FOREVER_APP_SHARE, FOREVER_PREFIX, enabled);
-        permission_message = forever_setting_permission_message(result);
-        if (permission_message) forever_say(permission_message);
-#ifdef FOREVER_MENU_DIAG
-        io_log("menu diag action configs=Config.wtf value=HDROutput=%d result=%d",
-               !!enabled, result);
-#endif
-        if (result < 0) return result;
         result = forever_menu_rewrite_switch(
             FOREVER_DRIVE_C "/wineps5-hdr-output.txt", "hdr", enabled);
         permission_message = forever_setting_permission_message(result);
@@ -3734,7 +3705,7 @@ static void *pw_title_icon_thread(void *unused)
     int answer = 0, error = 0;
 
     (void)unused;
-    io_log("forever: icon from the Battle.net launcher result=%d", result);
+    io_log("forever: icon from the Steam launcher result=%d", result);
     if (result < 0 && !forever_exists(WB_ICON_FILE)) return NULL;
     /* the broker may still be starting (the ELF loader took up to 5.7 s) */
     for (int attempt = 0; attempt < 60; ++attempt)
@@ -3755,7 +3726,7 @@ static void pw_title_icon_start(void)
     struct stat launcher;
     pthread_t thread;
 
-    if (stat(PW_RUNTIME_LAUNCHER_UNIX, &launcher)) return; /* Battle.net is not installed yet */
+    if (stat(PW_RUNTIME_LAUNCHER_UNIX, &launcher)) return; /* Steam is not installed yet */
     if (create_thread(&thread, NULL, pw_title_icon_thread, NULL)) return;
     pthread_detach(thread);
 }
@@ -4102,7 +4073,8 @@ int main(int argc, char **argv)
 #else
     char *args[]=PW_RUNTIME_PARENT_ARGV;
     char *installer_args[]={(char *)PW_RUNTIME_LOADER, "C:\\windows\\system32\\start.exe",
-                            "/exec", (char *)PW_RUNTIME_INSTALLER_DOS, NULL};
+                            "/exec", (char *)PW_RUNTIME_INSTALLER_DOS,
+                            PW_RUNTIME_INSTALLER_SWITCH[0] ? (char *)PW_RUNTIME_INSTALLER_SWITCH : NULL, NULL};
     char *wineboot_args[]={(char *)PW_RUNTIME_LOADER, "C:\\windows\\system32\\wineboot.exe", "-i", NULL};
     const char *cwd = forever_prefix_init ? FOREVER_PREFIX : installer ? PW_RUNTIME_INSTALLER_CWD : PW_RUNTIME_CWD;
     if (setenv("WINEPS5_TITLE_PARENT_CWD", cwd, 1)) return 1;
@@ -4129,10 +4101,10 @@ int main(int argc, char **argv)
             io_log("b1 parent installer command=%s cwd=%s", PW_RUNTIME_INSTALLER_DOS, cwd);
         b1_message(NULL);
         io_log("b1 maintenance parent command=%s argc=%d cwd=%s runtime_root=%s headless=%d", args[1],
-               installer ? 4 : PW_RUNTIME_PARENT_ARGC, cwd, PW_RUNTIME_ROOT, PW_RUNTIME_HEADLESS);
+               installer ? 4 + !!PW_RUNTIME_INSTALLER_SWITCH[0] : PW_RUNTIME_PARENT_ARGC, cwd, PW_RUNTIME_ROOT, PW_RUNTIME_HEADLESS);
         pw_title_log_begin();
         if (!installer) pw_prefetch_hosts();
-        result=wine_public_title_main(installer ? 4 : PW_RUNTIME_PARENT_ARGC, installer ? installer_args : args);
+        result=wine_public_title_main(installer ? 4 + !!PW_RUNTIME_INSTALLER_SWITCH[0] : PW_RUNTIME_PARENT_ARGC, installer ? installer_args : args);
     }
 #endif
 #else

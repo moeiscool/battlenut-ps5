@@ -1,4 +1,4 @@
-# Building Forever Launcher on Linux
+# Building 5team on Linux
 
 Use an x86-64 Linux host with Docker and a fresh, writable source directory.
 No console, shared SDK, remote RADV build, prefix, installed game, or Mac build
@@ -56,7 +56,7 @@ Outputs under `ps5-wow/ps5/build/`:
 
 - `whisper/{include,lib}`: target speech-engine headers and five static archives.
 - `title-psmkit-wine-b1/`: independently qualified maintenance and game roles.
-- `release/PPSA99030.zip`: catalog archive, with size and SHA-256 in the output.
+- `release/PPSA99031.zip`: catalog archive, with size and SHA-256 in the output.
 - `release/logs/`: complete per-stage logs and `timings.tsv` (seconds/status).
 
 ### Voice-to-Text dependencies
@@ -126,7 +126,7 @@ Each visible recording session logs `voice overlay format=<VkFormat> shown=<0|1>
 once, with no transcript or microphone data.
 
 At the first touchpad press the game parent logs
-`voice setting path=/data/forever/prefix/drive_c/wineps5-voice.txt rc=<errno>`.
+`voice setting path=/data/5team/prefix/drive_c/wineps5-voice.txt rc=<errno>`.
 Every press end logs
 `voice hold enabled=<0|1> result=<passthrough|click|drag|record> held_ms=<uint> max_move=<uint> setting_rc=<errno>`.
 The setting result is the `fopen` errno (0 on success, -1 if not attempted);
@@ -237,7 +237,7 @@ here is a host build/inspection gate, **not console execution**.
   exposing drawing in progress to the compositor, fixing the installer's
   crawling flicker.
 - Windows disk-space queries use the write broker's real storage counters for
-  `/data/forever`. An older or unavailable broker retains the previous synthetic
+  `/data/5team`. An older or unavailable broker retains the previous synthetic
   16 GiB free-space answer.
 - The desktop background uses the drawn purple picture again.
 
@@ -500,7 +500,7 @@ The `.012` sources retain the two independent drive-reporting fixes:
 - Wine's `server/directory.c` initializes the PS5 in-process server's `C:` and
   `W:` links in `\??` with fd-backed `\Device\HarddiskVolume1` and
   `\Device\HarddiskVolume2` devices. `C:` maps to the prefix's `drive_c`; `W:`
-  maps to the prefix's parent (`/data/forever` by default). Ordinary file
+  maps to the prefix's parent (`/data/5team` by default). Ordinary file
   access alone did not populate the object namespace used for drive enumeration.
 - The SDK's `platform/src/libc.c` sets `MNT_LOCAL` in its FreeBSD
   `statfs`/`fstatfs` responses. Without this flag Wine classified the console's
@@ -804,7 +804,7 @@ checks, bounds/pressure/kill-switch cases and failed reclaim/reopen ownership.
 ## Native release gate
 
 Before publishing the corrected release or promoting its catalog entry, install
-the exact final `PPSA99030.zip` on the PS5. Repeat the unchanged raw drive probe
+the exact final `PPSA99031.zip` on the PS5. Repeat the unchanged raw drive probe
 in both 32-bit and 64-bit modes, then run Wine's opt-in, read-only regression
 `kernel32_test.exe volume ps5-title-drives` in both architectures. Require only
 `C:`/`W:` in drive enumeration, local fixed-disk device information for both

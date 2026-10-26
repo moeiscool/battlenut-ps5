@@ -488,7 +488,7 @@ static void test_menu_overlay(void)
                 hint_text_pixels++;
     check(hint_text_pixels > 100, "start-up hint draws visible Noto text inside its panel");
     write_addon_preview("startup-hint");
-    compositor_message("Downloading the Battle.net installer: 12.0 of 150.0 MB");
+    compositor_message("Downloading the Steam installer: 12.0 of 150.0 MB");
     compositor_compose();
     check(compositor_hint_bounds(&hint) && compositor_message_bounds(&status) &&
           (hint.right <= status.left || hint.left >= status.right ||
@@ -514,7 +514,7 @@ static void test_menu_overlay(void)
     check(menu_rect.right - menu_rect.left == MENU_PANEL_WIDTH,
           "menu uses the large fixed-width TV panel");
     check(menu_rect.top >= 0 && menu_rect.bottom <= DISPLAY_HEIGHT,
-          "main menu including the final Exit Battle.net row fits on screen");
+          "main menu including the final Exit Steam row fits on screen");
     check(compositor_menu_line_bounds(0, &title) &&
           compositor_menu_line_bounds(FOREVER_MENU_LINE_FRAME_GENERATION, &selected) &&
           compositor_menu_line_bounds(FOREVER_MENU_LINE_HDR, &hdr),
@@ -524,10 +524,10 @@ static void test_menu_overlay(void)
     check(compositor_menu_line_bounds(FOREVER_MENU_LINE_CLOSE, &close_row) &&
           compositor_menu_line_bounds(FOREVER_MENU_LINE_EXIT, &exit_row) &&
           close_row.bottom <= exit_row.top && exit_row.bottom < menu_rect.bottom,
-          "Exit Battle.net is below Close inside the menu panel");
+          "Exit Steam is below Close inside the menu panel");
     check(compositor_menu_line_at((exit_row.left + exit_row.right) / 2,
                                   (exit_row.top + exit_row.bottom) / 2) ==
-          FOREVER_MENU_LINE_EXIT, "mouse hit testing reaches the final Exit Battle.net row");
+          FOREVER_MENU_LINE_EXIT, "mouse hit testing reaches the final Exit Steam row");
     check(compositor_menu_value_bounds(FOREVER_MENU_LINE_FRAME_GENERATION, &fg_value) &&
           compositor_menu_value_bounds(FOREVER_MENU_LINE_HDR, &hdr_value) &&
           compositor_menu_value_bounds(FOREVER_MENU_LINE_HUD, &hud_value) &&
@@ -561,14 +561,14 @@ static void test_menu_overlay(void)
     compositor_menu(text);
     compositor_compose();
     check(image[(size_t)(exit_row.top + 2) * DISPLAY_WIDTH + exit_row.left + 2] ==
-          MENU_SELECTION, "Exit Battle.net has a full-width selection highlight");
+          MENU_SELECTION, "Exit Steam has a full-width selection highlight");
     assert(forever_menu_select(&menu).command == FOREVER_MENU_COMMAND_NONE);
     forever_menu_render(&menu, text, sizeof(text));
     compositor_menu(text);
     compositor_compose();
     check(compositor_menu_text_supported(text) && compositor_menu_title_fits() &&
           menu_rect.top >= 0 && menu_rect.bottom <= DISPLAY_HEIGHT,
-          "Exit Battle.net confirmation title and panel fit on screen");
+          "Exit Steam confirmation title and panel fit on screen");
     check(compositor_menu_line_bounds(FOREVER_MENU_LINE_CANCEL, &cancel) &&
           compositor_menu_line_bounds(FOREVER_MENU_LINE_CONFIRM, &confirm) &&
           compositor_menu_line_at((cancel.left + cancel.right) / 2,
@@ -717,7 +717,7 @@ static void test_menu_overlay(void)
     write_addon_preview("wago-key-choice");
     forever_menu_notice(
         &menu,
-        "Could not remove all Battle.net files (error 13). Your games were not touched.");
+        "Could not remove all Steam files (error 13). Your games were not touched.");
     forever_menu_render(&menu, text, sizeof(text));
     compositor_menu(text);
     compositor_compose();

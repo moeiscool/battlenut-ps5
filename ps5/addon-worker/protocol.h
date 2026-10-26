@@ -1,4 +1,4 @@
-/* Forever Launcher native add-on worker wire protocol. */
+/* 5team native add-on worker wire protocol. */
 #ifndef FOREVER_ADDON_WORKER_PROTOCOL_H
 #define FOREVER_ADDON_WORKER_PROTOCOL_H
 
@@ -29,7 +29,7 @@
 #define AW_PHASE_PROGRESS 2u
 #define AW_PHASE_COMPLETE 3u
 
-#define AW_NATIVE_ROOT "/data/forever/prefix/drive_c/Forever/AddonStaging"
+#define AW_NATIVE_ROOT "/data/5team/prefix/drive_c/Forever/AddonStaging"
 #define AW_WINDOWS_ROOT "C:\\Forever\\AddonStaging"
 #define AW_RELATIVE_ELF "addon-worker.elf"
 

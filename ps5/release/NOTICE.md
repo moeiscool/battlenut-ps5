@@ -1,6 +1,6 @@
 # Third-party notices
 
-Forever Launcher as a whole is distributed under the GNU General Public License,
+5team as a whole is distributed under the GNU General Public License,
 version 3 or later (see `LICENSE`). It combines the components below, which keep
 their own licences. External sources are listed at the exact revision in
 `ps5/release/deps.json`; repository-contained third-party sources keep
@@ -44,7 +44,7 @@ instructions.
 
 - **`Lossless.dll`** from [Lossless Scaling](https://store.steampowered.com/app/993090/Lossless_Scaling/)
   is proprietary. It is never shipped or downloaded. Users supply their own copy;
-  Forever Launcher reads shader resources from it and never runs its code.
+  5team reads shader resources from it and never runs its code.
 - **Battle.net and World of Warcraft** are downloaded by the user from Blizzard
   with Blizzard's own installer and are subject to Blizzard's terms.
 

@@ -1,4 +1,4 @@
-// Forever Launcher - bounded native add-on archive worker.
+// 5team - bounded native add-on archive worker.
 // Copyright (C) 2026 bizkut
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
@@ -26,7 +26,7 @@ inline constexpr std::size_t kExtractWorkers = 8;
 inline constexpr std::uint64_t kMaxArchiveBytes = 4ull << 30;
 inline constexpr std::uint64_t kMaxUnpackedBytes = 16ull << 30;
 inline constexpr const char *kNativeWowRoot =
-    "/data/forever/prefix/drive_c/Program Files (x86)/World of Warcraft";
+    "/data/5team/prefix/drive_c/Program Files (x86)/World of Warcraft";
 inline constexpr std::size_t kMaxActivationFolders = 2048;
 inline constexpr std::size_t kMaxArchiveEntries = 32768;
 inline constexpr std::size_t kMaxArchivePath = 1024;

@@ -1,8 +1,8 @@
-# Forever Launcher
+# 5team
 
 Run **Battle.net** on a jailbroken **PlayStation 5**.
 
-Forever Launcher (`PPSA99030`) runs Battle.net and World of Warcraft through
+5team (`PPSA99031`) runs Battle.net and World of Warcraft through
 Wine, using DirectX 12 on the PS5's own GPU. Choose the WoW version you want in
 Battle.net: Retail, Classic, Classic Era, Anniversary, Forever, beta or PTR.
 The launcher detects channel folders rather than keeping a list of versions.
@@ -19,7 +19,7 @@ or work online.
 > supported. A USB keyboard and mouse work in Battle.net and WoW.
 
 > [!WARNING]
-> **Alpha software.** Expect bugs. Forever Launcher is not made, approved or
+> **Alpha software.** Expect bugs. 5team is not made, approved or
 > supported by Blizzard Entertainment, Sony Interactive Entertainment or Valve.
 > Using unofficial software with an online game is at your own risk.
 
@@ -60,21 +60,21 @@ Older release notes are on the [releases page](https://github.com/bizkut/ps5-for
 
 **ProsperoStore** (recommended): install
 [ProsperoStore](https://github.com/darkxex/ProsperoStore/releases), then install
-**Forever Launcher** from it. ProsperoStore also installs updates.
+**5team** from it. ProsperoStore also installs updates.
 
 **By hand:**
 
-1. Download `PPSA99030.zip` from the [latest release](https://github.com/bizkut/ps5-forever/releases/latest).
-2. Unzip it. Copy the `PPSA99030` folder to a location ShadowMountPlus scans,
-   such as `/data/homebrew/PPSA99030`. The app folder can also be on an external drive;
-   games and settings remain in `/data/forever`.
-3. Let ShadowMountPlus register it, then start **Forever Launcher** from the home screen.
+1. Download `PPSA99031.zip` from the [latest release](https://github.com/bizkut/ps5-forever/releases/latest).
+2. Unzip it. Copy the `PPSA99031` folder to a location ShadowMountPlus scans,
+   such as `/data/homebrew/PPSA99031`. The app folder can also be on an external drive;
+   games and settings remain in `/data/5team`.
+3. Let ShadowMountPlus register it, then start **5team** from the home screen.
 
 ## First start
 
 1. The first start sets up the Windows files. This takes a few minutes. The app
    restarts by itself when it is done.
-2. Forever Launcher downloads Blizzard's Battle.net installer and automatically
+2. 5team downloads Blizzard's Battle.net installer and automatically
    continues past its fixed install-location page. Wait while Battle.net installs.
 3. Sign in to Battle.net (see below).
 4. In Battle.net, choose the World of Warcraft version you want, press
@@ -86,7 +86,7 @@ If WoW is already installed on a PC, you can copy it to the console over your
 home network instead of downloading it again. Battle.net then only checks the
 files and downloads what is missing.
 
-1. Start Forever Launcher once and install Battle.net (steps 1–3 above), then
+1. Start 5team once and install Battle.net (steps 1–3 above), then
    close the app.
 2. On the PC, find your `World of Warcraft` folder. On Windows it is usually
    `C:\Program Files (x86)\World of Warcraft`. A Mac install
@@ -96,19 +96,19 @@ files and downloads what is missing.
    `.build.info` and `.product.db`, to the console as:
 
    ```text
-   /data/forever/prefix/drive_c/Program Files (x86)/World of Warcraft
+   /data/5team/prefix/drive_c/Program Files (x86)/World of Warcraft
    ```
 
    Use a wired network if you can. Classic is about 50 GB; Retail is much larger.
-4. Start Forever Launcher. In Battle.net, select the game. If it shows
+4. Start 5team. In Battle.net, select the game. If it shows
    **Install**, use **Locate the game** below the button and choose
    `C:\Program Files (x86)\World of Warcraft`.
 5. Battle.net checks the files and downloads only what is missing or newer.
    For a full check, use the gear next to **Play** → **Scan and Repair**.
 
-Forever Launcher fixes the file permissions of copied folders at startup, so
+5team fixes the file permissions of copied folders at startup, so
 you normally don't need to change them by hand. If it still says it can't
-write to `/data/forever/prefix`, see [Troubleshooting](#troubleshooting).
+write to `/data/5team/prefix`, see [Troubleshooting](#troubleshooting).
 
 ## Signing in to Battle.net
 
@@ -117,7 +117,7 @@ write to `/data/forever/prefix`, see [Troubleshooting](#troubleshooting).
 - Your account needs an **authenticator** enabled.
 - Signing in with **Google, Apple, Facebook, Xbox, PlayStation or any other
   third-party account is not supported.**
-- Forever Launcher does not implement credential capture. Battle.net keeps its
+- 5team does not implement credential capture. Battle.net keeps its
   own sign-in token in your user data folder so you stay signed in.
 
 ## Controls
@@ -210,7 +210,7 @@ other sources work without one.
 If frame generation currently uses `fg=auto`, selecting it turns it off;
 selecting it again turns it on. Frame generation and the performance overlay
 use their live settings files; HDR applies the next time WoW starts. After
-removing Battle.net, close and start Forever Launcher to install it again.
+removing Battle.net, close and start 5team to install it again.
 
 ## Frame generation
 
@@ -239,12 +239,12 @@ To use Lossless Scaling:
 2. Copy it by FTP to the console as:
 
    ```text
-   /data/forever/prefix/drive_c/Lossless.dll
+   /data/5team/prefix/drive_c/Lossless.dll
    ```
 
 3. Restart WoW.
 
-Settings live in `/data/forever/prefix/drive_c/wineps5-fg.txt`. Changes apply
+Settings live in `/data/5team/prefix/drive_c/wineps5-fg.txt`. Changes apply
 while the game runs, within a second.
 
 ```text
@@ -258,7 +258,7 @@ fg=on method=auto mult=2 flow=1.0
 | `flow` | `0.25` to `1.0`: lower is cheaper, `1.0` looks best (Lossless Scaling only) |
 | `method` | `auto` (Lossless Scaling when `Lossless.dll` is there, else FSR 3), `lossless`, or `fsr3` |
 
-The on-screen display settings are in `/data/forever/prefix/drive_c/wineps5-hud.txt`
+The on-screen display settings are in `/data/5team/prefix/drive_c/wineps5-hud.txt`
 (`hud=on` or `hud=off`, `pos=tl`, `scale=2`); the Forever menu changes `hud`
 without replacing the other options.
 
@@ -277,8 +277,8 @@ Add-ons discovery or direct start.
 
 ### Start one channel directly
 
-Create `/data/homebrew/PPSA99030/wine/direct-game` with just the channel folder
-name, for example `_classic_era_` or `_retail_`, then start Forever Launcher.
+Create `/data/homebrew/PPSA99031/wine/direct-game` with just the channel folder
+name, for example `_classic_era_` or `_retail_`, then start 5team.
 The file is consumed once. If that channel is missing or incomplete, the log
 explains why and Battle.net opens; another channel is never chosen instead.
 An empty file prefers Classic beta, then Forever, then another complete
@@ -286,19 +286,19 @@ installed channel.
 
 ## Where your data is
 
-Everything that is yours is in **`/data/forever`**: Battle.net, WoW, your
+Everything that is yours is in **`/data/5team`**: Battle.net, WoW, your
 settings, `Lossless.dll` and the shader cache. The app folder
-(`/data/homebrew/PPSA99030`) holds only the app.
+(`/data/homebrew/PPSA99031`) holds only the app.
 
 Updating the app replaces only the app folder. Your games and settings stay.
 
 ## Updating
 
 - **ProsperoStore** shows updates and installs them.
-- **By hand:** close the app and replace only its `PPSA99030` app folder
-  with the folder from the new zip. Do not delete `/data/forever`.
+- **By hand:** close the app and replace only its `PPSA99031` app folder
+  with the folder from the new zip. Do not delete `/data/5team`.
 
-Every start checks the app's Windows files in `/data/forever`, including Wine's
+Every start checks the app's Windows files in `/data/5team`, including Wine's
 system DLLs, and repairs any that differ from the app's own copies, because
 mismatched copies can crash games during startup. The first start after an
 update checks every file once (about 15–20 seconds); later starts take less than
@@ -306,32 +306,32 @@ a second.
 
 ## Uninstalling
 
-Delete the app from the home screen (or delete `/data/homebrew/PPSA99030`), then
-delete `/data/forever` to remove Battle.net, WoW and your settings.
+Delete the app from the home screen (or delete `/data/homebrew/PPSA99031`), then
+delete `/data/5team` to remove Battle.net, WoW and your settings.
 
 ## Privacy and support data
 
 - Release logs retain aggregate input-health counters, not raw keyboard records,
   key usages or modifiers.
-- Treat `/data/forever` as sensitive shared Wine-prefix storage. Never include
+- Treat `/data/5team` as sensitive shared Wine-prefix storage. Never include
   registry hives, browser profiles, session/account files or saved credentials in
   support bundles, and review Wine/application logs and screenshots before sharing.
 
 ## Troubleshooting
 
-- **"Forever Launcher can't write to ..." (permission denied)**: the app
+- **"5team can't write to ..." (permission denied)**: the app
   restarts its file helper once to repair folder permissions under
-  `/data/forever`, then tries again. If the message remains, close the app and,
-  on a PC, use FTP to set `/data/forever` and everything in it to permission
-  `777`; then start Forever Launcher again.
+  `/data/5team`, then tries again. If the message remains, close the app and,
+  on a PC, use FTP to set `/data/5team` and everything in it to permission
+  `777`; then start 5team again.
 - **Drives:** only `C:` and `W:` work inside Wine; `Z:` and network shares are
   not supported.
-- **"Forever Launcher cannot use /data" (error 2 or 30)**: `/data` is missing
+- **"5team cannot use /data" (error 2 or 30)**: `/data` is missing
   or read-only. Update ShadowMountPlus to a version that lets apps use `/data`.
 - **Battle.net sign-in fails**: use the email code and make sure an authenticator is
   enabled on your account. Third-party sign-in is not supported.
 - **Battle.net reports only about 17 GB free**: Windows disk-space queries use the
-  write broker's real storage counters for `/data/forever`. If the broker is
+  write broker's real storage counters for `/data/5team`. If the broker is
   unavailable or is from an older app version, they fall back to the title's
   synthetic 16 GiB free-space answer. The kernel log identifies the source with
   `wine: title disk space source=broker` or `source=synthetic`; restart the updated
@@ -339,7 +339,7 @@ delete `/data/forever` to remove Battle.net, WoW and your settings.
 - **Frame generation does nothing**: check that `wineps5-fg.txt` says `fg=on`.
   Open the Forever menu from Battle.net to turn the performance overlay on; it
   shows `FG LOSSLESS` or `FG FSR3`. For Lossless Scaling, the file must be
-  exactly `/data/forever/prefix/drive_c/Lossless.dll`.
+  exactly `/data/5team/prefix/drive_c/Lossless.dll`.
 - **Logs**: the console's kernel log (port 3232) shows what the app is doing.
   Lines starting with `forever:` describe setup.
 
@@ -351,7 +351,7 @@ See [BUILDING.md](BUILDING.md).
 
 ## Credits
 
-Forever Launcher is built on the work of many projects. Thank you to all of them.
+5team is built on the work of many projects. Thank you to all of them.
 Licences and details are in [NOTICE.md](NOTICE.md).
 
 - [Proton](https://github.com/ValveSoftware/Proton) by Valve: the base this project starts from.
@@ -380,12 +380,12 @@ Licences and details are in [NOTICE.md](NOTICE.md).
   [ProsperoStore](https://github.com/blackbearreloaded/ProsperoStore) and the
   [PS5 homebrew catalog](https://github.com/blackbearreloaded/ps5-homebrew-catalog).
 - Noto and Droid fonts (OFL / Apache-2.0) and Mozilla's root certificates (MPL-2.0).
-- Mihawk's earlier Forever Launcher: generated placeholder artwork and runtime icon extraction (MIT).
+- Mihawk's earlier 5team: generated placeholder artwork and runtime icon extraction (MIT).
 - [stb_image](https://github.com/nothings/stb) by Sean Barrett and contributors: PNG decoding (MIT or public domain).
 
 ## Licence
 
-Forever Launcher is licensed under the [GNU General Public License v3.0 or later](LICENSE).
+5team is licensed under the [GNU General Public License v3.0 or later](LICENSE).
 Third-party components keep their own licences; see [NOTICE.md](NOTICE.md).
 
 World of Warcraft, Battle.net and Blizzard are trademarks of Blizzard Entertainment, Inc.

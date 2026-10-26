@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # The title's home-screen icon, sce_sys/icon0.png, drawn from nothing but
-# shapes, so its origin is this script. Forever Launcher replaces the copies
+# shapes, so its origin is this script. 5team replaces the copies
 # the home screen shows with the installed Battle.net Launcher.exe's icon once
 # Battle.net is installed (psmkit-wine/title-icon.h); this one shows until then
 # and is the icon the homebrew catalog lists.

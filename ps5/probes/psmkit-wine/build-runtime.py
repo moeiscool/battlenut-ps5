@@ -570,8 +570,8 @@ if args.profile == 'b1':
     profile_defines += f'#define PW_RUNTIME_HEADLESS {1 if selected["headless"] else 0}\n'
     profile_defines += ''.join(
         f'#define PW_RUNTIME_{key.upper()} {json.dumps(selected[key])}\n'
-        for key in ('installer_url', 'installer_fallback_url', 'installer_dos', 'launcher_unix', 'installer_unix',
-                    'installer_cwd'))
+        for key in ('launcher_name', 'installer_url', 'installer_fallback_url', 'installer_dos',
+                    'installer_switch', 'launcher_unix', 'installer_unix', 'installer_cwd'))
     profile_defines += '#define PW_RUNTIME_PAYLOAD_PROGRAMS ' + json.dumps(';'.join(selected['payload_programs'])) + '\n'
     profile_defines += '#define PW_RUNTIME_REFUSED_PROGRAMS ' + json.dumps(';'.join(selected['refused_programs'])) + '\n'
     profile_defines += '#define PW_RUNTIME_PREFETCH_HOSTS ' + json.dumps(';'.join(selected['prefetch_hosts'])) + '\n'
@@ -790,7 +790,7 @@ if args.profile == 'b1':
         if hashlib.sha256(cache.read_bytes()).hexdigest() != digest:
             raise SystemExit(f'pinned font asset digest mismatch: {cache}')
         shutil.copy2(cache, tree / 'share/wine/fonts' / name)
-    # Forever Launcher keeps the user's prefix in /data/forever. forever-setup.h
+    # 5team keeps the user's prefix in /data/5team. forever-setup.h
     # installs these first-start defaults and copies the prefix files the app
     # owns whenever this list (source, prefix path, digest) changes.
     forever = tree / 'share/forever'
@@ -819,7 +819,7 @@ if args.profile == 'b1':
                 raise SystemExit(f'missing app-owned prefix file {source}')
             shutil.copy2(source, forever / 'system32' / name)
             owned[f'drive_c/windows/system32/{name}'] = f'share/forever/system32/{name}'
-    lines = ['# Forever Launcher: prefix files the app owns (source below wine-title, prefix path, sha256)']
+    lines = ['# 5team: prefix files the app owns (source below wine-title, prefix path, sha256)']
     for destination, source in sorted(owned.items()):
         path = tree / source
         if not path.is_file():

@@ -1,12 +1,12 @@
 # Homebrew catalog texts
 
-## Record description (`apps/PPSA99030.json`, `description`)
+## Record description (`apps/PPSA99031.json`, `description`)
 
 Battle.net launcher for World of Warcraft (Retail, Classic and Forever) with a built-in add-on manager; press Options for the Forever menu and L3+R3 for the on-screen keyboard.
 
 ## Release notes (GitHub release description, shown by the catalog)
 
-### Forever Launcher 01.000.021
+### 5team 01.000.021
 
 **Adds PS5 VRR support for WoW at up to 120 Hz.**
 
@@ -18,7 +18,7 @@ Battle.net launcher for World of Warcraft (Retail, Classic and Forever) with a b
 - On a compatible display, set PS5 **VRR** to **Automatic**. If VideoOut does
   not offer or accept the 119.88 Hz mode, Forever continues at 59.94 Hz.
 
-### Forever Launcher 01.000.020
+### 5team 01.000.020
 
 **Repairs Battle.net signature setup and completes large add-on installs.**
 
@@ -37,7 +37,7 @@ Battle.net launcher for World of Warcraft (Retail, Classic and Forever) with a b
 - Existing 01.000.018 catalogue caches migrate automatically to the corrected
   package list.
 
-### Forever Launcher 01.000.018
+### 5team 01.000.018
 
 **Fixes missing multi-pack add-ons in Find.**
 
@@ -46,7 +46,7 @@ Battle.net launcher for World of Warcraft (Retail, Classic and Forever) with a b
 - Includes complete GitHub release pagination from 01.000.017, so older release streams install without silently selecting the wrong release.
 - 01.000.017 was superseded before its homebrew-catalog submission after native testing found the same-repository listing bug.
 
-### Forever Launcher 01.000.017
+### 5team 01.000.017
 
 **More Spoken audio packs and complete GitHub add-on release discovery.**
 
@@ -54,7 +54,7 @@ Battle.net launcher for World of Warcraft (Retail, Classic and Forever) with a b
 - Add-ons can now install from release streams older than a GitHub repository's first 100 releases. Forever follows every release page until it finds the requested stream.
 - GitHub API, connection and malformed-response errors remain visible instead of silently installing the wrong release.
 
-### Forever Launcher 01.000.016
+### 5team 01.000.016
 
 **Faster Battle.net installs and Blizzard game downloads.**
 
@@ -73,7 +73,7 @@ Battle.net launcher for World of Warcraft (Retail, Classic and Forever) with a b
 - Installs and updates show progress text (download percentage and unpacked files).
 - Removing an add-on is instant. The leftover files are deleted in the background once the Add-ons page is closed, and reopening the page pauses that cleanup.
 
-### Forever Launcher 01.000.015
+### 5team 01.000.015
 
 **New: Voice-to-Text for WoW chat.** Hold the touchpad and speak; your words are typed into WoW's chat box as you talk.
 
@@ -91,7 +91,7 @@ Other changes:
 - Add-ons Find: results now filter as you type with the on-screen keyboard, not only after you close it.
 - Downloads follow web redirects themselves: the PS5's built-in redirect handling returned empty files. This fixes the speech-model download. The Battle.net installer uses the same handling but has not been retested on a console.
 
-### Forever Launcher 01.000.014
+### 5team 01.000.014
 
 - Detects installed WoW channels without a launch-version list, including Retail, Classic, Classic Era, Anniversary, Forever, beta, PTR and future channel names.
 - A one-shot `wine/direct-game` file can select a channel folder such as `_retail_`; an unavailable selection never starts another version.
@@ -108,21 +108,21 @@ Other changes:
 - Add-ons needs a recognized game version; an unknown or future version can launch but may not have a compatible catalogue. Installing from Wago with a real key, Update all and Reinstall/Uninstall Battle.net are not yet console-tested.
 - Console checks on a private build: Retail, Classic (MoP), Classic Era, Anniversary and the Forever beta all start from Battle.net Play.
 
-### Forever Launcher 01.000.013
+### 5team 01.000.013
 
 - Options opens the Forever menu over Battle.net; F12 opens it from a USB keyboard. The menu controls frame generation, HDR, the performance overlay and Add-ons, and can Reinstall or Uninstall Battle.net.
 - L2 is now Back in Battle.net. The old in-WoW overlay hold has been removed.
 - Add-ons (AddonForge) has Find search by name or description, GitHub link installation and a personal Wago API key page. Installing from Wago with a real key is not yet tested.
 - A short start-up hint shows the Options menu and L2 Back controls until the Forever menu has been opened once.
 - The recommended `Config.wtf` now uses `RenderFormat 1`.
-- Start-up repairs stale root-owned permissions under `/data/forever` without following symbolic links or changing hard-linked files.
+- Start-up repairs stale root-owned permissions under `/data/5team` without following symbolic links or changing hard-linked files.
 - All prefix DLLs are kept identical to the app's Wine build.
 - Faster Battle.net downloads with write buffering: measured about 3.9 → 12 MB/s on one console.
 - Reinstall/Uninstall Battle.net has not been tested on a console yet.
 
-### Forever Launcher 01.000.012
+### 5team 01.000.012
 
-- Fixes WoW freezing on the loading screen about half the time at start (a startup crash): the app now keeps Wine's system DLLs in `/data/forever` identical to the ones it loads. The first start after updating copies these files once and takes about 2 minutes.
+- Fixes WoW freezing on the loading screen about half the time at start (a startup crash): the app now keeps Wine's system DLLs in `/data/5team` identical to the ones it loads. The first start after updating copies these files once and takes about 2 minutes.
 - Battle.net no longer asks to update installed games on every start: Wine now reports the folder permissions its Agent expects.
 - WoW and Battle.net show their own mouse cursors, including WoW's gauntlet and Battle.net's text and link cursors, with the click point in the right place.
 - On most Battle.net pages, the controller's D-pad moves between buttons and links, and Triangle presses.
@@ -146,10 +146,10 @@ Other changes:
 
 The `01.000.007` workflow failed before publication because of stale import-policy entries. `01.000.008` removed only the obsolete `wineps5` `strlen`/`strstr` policy rows; the remaining import checks stay enabled.
 
-### About Forever Launcher
+### About 5team
 
 - This Battle.net launcher is designed for World of Warcraft: Forever.
 - It might be used to install other games. A USB keyboard and mouse work in Battle.net and WoW.
-- Your games and settings live in `/data/forever`; updating the app keeps them.
-- Frame generation is on by default: AMD FSR 3, or Lossless Scaling when you add your own `Lossless.dll` at `/data/forever/prefix/drive_c/Lossless.dll`.
+- Your games and settings live in `/data/5team`; updating the app keeps them.
+- Frame generation is on by default: AMD FSR 3, or Lossless Scaling when you add your own `Lossless.dll` at `/data/5team/prefix/drive_c/Lossless.dll`.
 - Sign in to Battle.net with your email and a code sent by email; your account needs an authenticator. Third-party sign-in is not supported.

@@ -233,7 +233,7 @@ static void protocol_tests(void)
         {.magic = WB_STATFS_MAGIC, .path_length = 1, .reserved = 1},
     };
     static const char *const refused[] = {
-        "/tmp/outside", WB_USER_ROOT "../outside", "/data/forever-other/space", WB_USER_ROOT,
+        "/tmp/outside", WB_USER_ROOT "../outside", "/data/5team-other/space", WB_USER_ROOT,
     };
     int fd = connection();
     {
@@ -254,16 +254,18 @@ static void protocol_tests(void)
         assert(!transfer(fd, (void *)outside, removal.path_length, 1));
         assert(!transfer(fd, &answer, sizeof(answer), 0));
         check(answer.magic == WB_MAGIC && answer.result == -EACCES,
-              "menu broker refuses every non-Battle.net root");
+              "menu broker refuses every non-Steam-client root");
         check(menu_remove_path_allowed(
-                  WB_USER_ROOT "prefix/drive_c/Program Files (x86)/Battle.net") &&
+                  WB_USER_ROOT "prefix/drive_c/Program Files (x86)/Steam/package") &&
               menu_remove_path_allowed(
-                  WB_USER_ROOT "prefix/drive_c/ProgramData/Battle.net") &&
+                  WB_USER_ROOT "prefix/drive_c/Program Files (x86)/Steam/steam.exe") &&
               menu_remove_path_allowed(
-                  WB_USER_ROOT "prefix/drive_c/users/steamuser/AppData/Local/Battle.net") &&
-              menu_remove_path_allowed(WB_USER_ROOT "prefix/drive_c/Battle.net-Setup.exe") &&
+                  WB_USER_ROOT "prefix/drive_c/users/steamuser/AppData/Local/Steam") &&
+              menu_remove_path_allowed(WB_USER_ROOT "prefix/drive_c/SteamSetup.exe") &&
               !menu_remove_path_allowed(
-                  WB_USER_ROOT "prefix/drive_c/Program Files (x86)/Battle.net/child"),
+                  WB_USER_ROOT "prefix/drive_c/Program Files (x86)/Steam") &&
+              !menu_remove_path_allowed(
+                  WB_USER_ROOT "prefix/drive_c/Program Files (x86)/Steam/package/child"),
               "menu broker deletion roots are the exact fixed set");
     }
 
@@ -388,11 +390,11 @@ static void permission_repair_tests(void)
     snprintf(hardlinked, sizeof(hardlinked), "%s/hardlinked", prefix);
     snprintf(hardlink_outside, sizeof(hardlink_outside), "%s/hardlink-outside", repair_data_root);
     snprintf(other_device, sizeof(other_device), "%s/other-device", prefix);
-    snprintf(legacy_parent, sizeof(legacy_parent), "%s/homebrew/PPSA99030", repair_data_root);
+    snprintf(legacy_parent, sizeof(legacy_parent), "%s/homebrew/PPSA99031", repair_data_root);
     snprintf(legacy_root, sizeof(legacy_root), "%s/wine", legacy_parent);
     snprintf(legacy_file, sizeof(legacy_file), "%s/prefix/system.reg", legacy_root);
     snprintf(sibling, sizeof(sibling), "%s/app-file", legacy_parent);
-    snprintf(store_parent, sizeof(store_parent), "%s/prosperostore/previous/PPSA99030",
+    snprintf(store_parent, sizeof(store_parent), "%s/prosperostore/previous/PPSA99031",
              repair_data_root);
     snprintf(store_root, sizeof(store_root), "%s/wine", store_parent);
     snprintf(store_file, sizeof(store_file), "%s/home/settings", store_root);
@@ -466,7 +468,7 @@ static void permission_repair_tests(void)
     assert(!symlink(outside, home));
     memset(&repair, 0, sizeof(repair));
     repair.device = device;
-    result = repair_root(data_fd, "forever/home", 1, &repair);
+    result = repair_root(data_fd, "5team/home", 1, &repair);
     check(result < 0 && repair.failed,
           "startup repair refuses a symlinked fixed root");
     assert(!unlink(home));
@@ -483,7 +485,7 @@ static void permission_repair_tests(void)
         }
         memset(&repair, 0, sizeof(repair));
         repair.device = device;
-        result = repair_root(data_fd, "forever/prefix/budget", 1, &repair);
+        result = repair_root(data_fd, "5team/prefix/budget", 1, &repair);
         check(result == -E2BIG && repair.scanned == TEST_REPAIR_MAX_ENTRIES &&
               repair.skipped,
               "visited-entry budget is charged for skipped symlinks");
@@ -492,13 +494,13 @@ static void permission_repair_tests(void)
     memset(&repair, 0, sizeof(repair));
     repair.device = device;
     inject_readdir_error = 1;
-    result = repair_root(data_fd, "forever/radv-shader-cache", 1, &repair);
+    result = repair_root(data_fd, "5team/radv-shader-cache", 1, &repair);
     check(result == -EIO && repair.failed,
           "root readdir error is reported as repair failure");
     memset(&repair, 0, sizeof(repair));
     repair.device = device;
     inject_closedir_error = 1;
-    result = repair_root(data_fd, "forever/radv-shader-cache", 1, &repair);
+    result = repair_root(data_fd, "5team/radv-shader-cache", 1, &repair);
     check(result == -EIO && repair.failed,
           "root closedir error is reported as repair failure");
 
@@ -515,7 +517,7 @@ static void permission_repair_tests(void)
         }
         memset(&repair, 0, sizeof(repair));
         repair.device = device;
-        result = repair_root(data_fd, "forever/home", 1, &repair);
+        result = repair_root(data_fd, "5team/home", 1, &repair);
         check(result == -E2BIG && repair.failed,
               "startup repair stops at its production depth bound");
     }
@@ -532,28 +534,28 @@ static void menu_removal_tests(void)
     struct stat status;
 
     snprintf(menu_prefix_root, sizeof(menu_prefix_root), "%s/menu-prefix", directory);
-    snprintf(app, sizeof(app), "%s/drive_c/Program Files (x86)/Battle.net", menu_prefix_root);
-    snprintf(wow, sizeof(wow), "%s/drive_c/Program Files (x86)/World of Warcraft/keep", menu_prefix_root);
+    snprintf(app, sizeof(app), "%s/drive_c/Program Files (x86)/Steam/package", menu_prefix_root);
+    snprintf(wow, sizeof(wow), "%s/drive_c/Program Files (x86)/Steam/steamapps/common/keep", menu_prefix_root);
     fixture_put(wow, "keep");
     {
         char nested[1024];
         snprintf(nested, sizeof(nested), "%s/sub/dir/file", app);
         fixture_put(nested, "remove");
     }
-    check(!menu_remove_request(WB_USER_ROOT "prefix/drive_c/Program Files (x86)/Battle.net"),
-          "production broker recursively deletes an accepted Battle.net root");
-    check(lstat(app, &status) && errno == ENOENT, "accepted Battle.net root is gone");
-    check(!stat(wow, &status) && S_ISREG(status.st_mode), "accepted deletion keeps WoW");
+    check(!menu_remove_request(WB_USER_ROOT "prefix/drive_c/Program Files (x86)/Steam/package"),
+          "production broker recursively deletes an accepted Steam client root");
+    check(lstat(app, &status) && errno == ENOENT, "accepted Steam client root is gone");
+    check(!stat(wow, &status) && S_ISREG(status.st_mode), "accepted deletion keeps steamapps");
 
     /* A file at an allowed root is unlinked without attempting directory traversal. */
     fixture_put(app, "regular root");
-    check(!menu_remove_request(WB_USER_ROOT "prefix/drive_c/Program Files (x86)/Battle.net"),
+    check(!menu_remove_request(WB_USER_ROOT "prefix/drive_c/Program Files (x86)/Steam/package"),
           "production broker removes a non-directory allowed root");
     check(lstat(app, &status) && errno == ENOENT, "non-directory root is gone");
 
-    snprintf(outside, sizeof(outside), "%s/outside/Battle.net/keep", directory);
+    snprintf(outside, sizeof(outside), "%s/outside/steamuser/AppData/Local/Steam/keep", directory);
     fixture_put(outside, "outside");
-    snprintf(ancestor, sizeof(ancestor), "%s/drive_c/ProgramData", menu_prefix_root);
+    snprintf(ancestor, sizeof(ancestor), "%s/drive_c/users", menu_prefix_root);
     {
         char parent[1024], target[1024];
         snprintf(parent, sizeof(parent), "%s/drive_c", menu_prefix_root);
@@ -561,25 +563,25 @@ static void menu_removal_tests(void)
         snprintf(target, sizeof(target), "%s/outside", directory);
         assert(!symlink(target, ancestor));
     }
-    check(menu_remove_request(WB_USER_ROOT "prefix/drive_c/ProgramData/Battle.net") < 0,
+    check(menu_remove_request(WB_USER_ROOT "prefix/drive_c/users/steamuser/AppData/Local/Steam") < 0,
           "production broker refuses a symlinked ancestor");
     check(!stat(outside, &status) && S_ISREG(status.st_mode), "ancestor symlink keeps outside tree");
     assert(!unlink(ancestor));
 
-    snprintf(local, sizeof(local), "%s/drive_c/users/steamuser/AppData/Local/Battle.net",
+    snprintf(local, sizeof(local), "%s/drive_c/users/steamuser/AppData/Local/Steam",
              menu_prefix_root);
     fixture_mkdirs(local);
     snprintf(link, sizeof(link), "%s/wow-link", local);
     {
         char target[1024];
-        snprintf(target, sizeof(target), "%s/drive_c/Program Files (x86)/World of Warcraft",
+        snprintf(target, sizeof(target), "%s/drive_c/Program Files (x86)/Steam/steamapps",
                  menu_prefix_root);
         assert(!symlink(target, link));
     }
     check(!menu_remove_request(
-              WB_USER_ROOT "prefix/drive_c/users/steamuser/AppData/Local/Battle.net"),
+              WB_USER_ROOT "prefix/drive_c/users/steamuser/AppData/Local/Steam"),
           "production broker unlinks an internal symlink without descending");
-    check(!stat(wow, &status) && S_ISREG(status.st_mode), "internal symlink keeps WoW");
+    check(!stat(wow, &status) && S_ISREG(status.st_mode), "internal symlink keeps steamapps");
 }
 
 typedef uintptr_t HANDLE;

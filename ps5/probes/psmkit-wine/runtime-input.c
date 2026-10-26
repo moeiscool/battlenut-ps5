@@ -574,7 +574,7 @@ enum voice_control { VOICE_CONTROL_NONE, VOICE_CONTROL_SEND, VOICE_CONTROL_CANCE
 static enum voice_control voice_control;
 static unsigned voice_pulses;
 static uint64_t voice_pulse_at;
-static const char voice_setting_path[] = "/data/forever/prefix/drive_c/wineps5-voice.txt";
+static const char voice_setting_path[] = "/data/5team/prefix/drive_c/wineps5-voice.txt";
 static int voice_setting_rc = -1, voice_setting_logged;
 static void tap_key(unsigned usage);
 static void route_ime(const struct ime_edit *edit);
@@ -583,7 +583,7 @@ static void route_ime(const struct ime_edit *edit);
 static int mouse_invert_scroll_enabled(void)
 {
     char text[FOREVER_MENU_FILE_BYTES];
-    FILE *file = fopen("/data/forever/prefix/drive_c/wineps5-mouse.txt", "r");
+    FILE *file = fopen("/data/5team/prefix/drive_c/wineps5-mouse.txt", "r");
     size_t size, begin = 0, end = 0;
     if (!file) return 1;
     size = fread(text, 1, sizeof(text), file);

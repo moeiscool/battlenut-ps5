@@ -45,7 +45,7 @@ static FILE *test_voice_fopen(const char *path, const char *mode)
 {
     const char *text;
     assert(!strcmp(mode, "r"));
-    if (!strcmp(path, "/data/forever/prefix/drive_c/wineps5-mouse.txt"))
+    if (!strcmp(path, "/data/5team/prefix/drive_c/wineps5-mouse.txt"))
     {
         mouse_setting_reads++;
         text = mouse_test_setting;
@@ -53,7 +53,7 @@ static FILE *test_voice_fopen(const char *path, const char *mode)
     }
     else
     {
-        assert(!strcmp(path, "/data/forever/prefix/drive_c/wineps5-voice.txt"));
+        assert(!strcmp(path, "/data/5team/prefix/drive_c/wineps5-voice.txt"));
         voice_setting_reads++;
         text = voice_test_setting;
         if (!text) { errno = voice_fopen_errno; return NULL; }
@@ -405,7 +405,7 @@ static void test_voice_routing(void)
     assert(voice_warmup_requests == warmups + 1); /* Warm during deferral, not at visibility. */
     assert(!pw_title_voice_overlay()); /* Deferring a press is not recording. */
     assert(voice_setting_line_count == 1 && voice_setting_rc == 0);
-    assert(strstr(logged_line, "voice setting path=/data/forever/prefix/drive_c/wineps5-voice.txt rc=0"));
+    assert(strstr(logged_line, "voice setting path=/data/5team/prefix/drive_c/wineps5-voice.txt rc=0"));
     assert(!pw_title_read_input(&event, sizeof(event), 0, 0, 0, 0));
     pad.touch_x = 180; /* Still held: the complete 80-unit roll is deferred. */
     route_pad(&pad, now + 399000, NULL);

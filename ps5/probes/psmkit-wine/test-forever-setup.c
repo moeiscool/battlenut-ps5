@@ -388,37 +388,37 @@ static void test_prefix_init_io_failures(void)
 static void test_migration(void)
 {
     char prefix[1024], home[1024], cache[1024], legacy[1024], store[1024], from[1024] = "";
-    path(prefix, "forever/prefix");
-    path(home, "forever/home");
-    path(cache, "forever/radv-shader-cache");
-    path(legacy, "homebrew/PPSA99030/wine");
-    path(store, "prosperostore/previous/PPSA99030/wine");
+    path(prefix, "5team/prefix");
+    path(home, "5team/home");
+    path(cache, "5team/radv-shader-cache");
+    path(legacy, "homebrew/PPSA99031/wine");
+    path(store, "prosperostore/previous/PPSA99031/wine");
     const char *roots[] = { legacy, store };
     char forever[1024];
-    path(forever, "forever");
+    path(forever, "5team");
     assert(!forever_mkdirs(forever));
 
     assert(forever_migrate(prefix, home, cache, roots, 2, from, sizeof(from)) == 0); /* nothing anywhere */
 
-    make_prefix("prosperostore/previous/PPSA99030/wine/prefix");
-    put("prosperostore/previous/PPSA99030/wine/prefix/drive_c/game.txt", "48 GiB\n");
-    put("prosperostore/previous/PPSA99030/wine/home/.cache/x", "h\n");
-    put("prosperostore/previous/PPSA99030/radv-shader-cache/mesa_cache.db", "pipelines\n");
+    make_prefix("prosperostore/previous/PPSA99031/wine/prefix");
+    put("prosperostore/previous/PPSA99031/wine/prefix/drive_c/game.txt", "48 GiB\n");
+    put("prosperostore/previous/PPSA99031/wine/home/.cache/x", "h\n");
+    put("prosperostore/previous/PPSA99031/radv-shader-cache/mesa_cache.db", "pipelines\n");
     assert(forever_migrate(prefix, home, cache, roots, 2, from, sizeof(from)) == 1);
     assert(!strcmp(from, store));
-    assert(text_is("forever/prefix/drive_c/game.txt", "48 GiB\n"));
-    assert(text_is("forever/home/.cache/x", "h\n"));
-    assert(text_is("forever/radv-shader-cache/mesa_cache.db", "pipelines\n")); /* the app's cache came along */
+    assert(text_is("5team/prefix/drive_c/game.txt", "48 GiB\n"));
+    assert(text_is("5team/home/.cache/x", "h\n"));
+    assert(text_is("5team/radv-shader-cache/mesa_cache.db", "pipelines\n")); /* the app's cache came along */
     {
         char moved[1100];
         snprintf(moved, sizeof(moved), "%s/prefix", store);
         assert(!forever_exists(moved)); /* moved, not copied */
     }
 
-    /* an existing prefix in /data/forever is never replaced */
-    make_prefix("homebrew/PPSA99030/wine/prefix");
+    /* an existing prefix in /data/5team is never replaced */
+    make_prefix("homebrew/PPSA99031/wine/prefix");
     assert(forever_migrate(prefix, home, cache, roots, 2, from, sizeof(from)) == 0);
-    assert(text_is("forever/prefix/drive_c/game.txt", "48 GiB\n"));
+    assert(text_is("5team/prefix/drive_c/game.txt", "48 GiB\n"));
 }
 
 static const char managed_v1[] =
@@ -989,60 +989,6 @@ static void test_managed_manifest_guards(void)
     assert(managed_sync() == -EINVAL);
 }
 
-static void test_wow_config(void)
-{
-    static const char *const channels[] = {"_forever_", "_classic_beta_", "_retail_", "_classic_era_", "_anniversary_", "_newthing_"};
-    static const char *const executables[] = {"Wow.exe", "WowB.exe", "Wow.exe", "WowClassic.exe", "WowClassic.exe", "wOwNew.EXE"};
-    static const char preset[] = "SET GamePadEnable \"1\"\n";
-    static const char mine[] = "SET mine \"1\"\n";
-    char share[1024], prefix[1024], relative[512], config[1024];
-    path(share, "app/share");
-    path(prefix, "wow/prefix");
-    put("app/share/Config.wtf", preset);
-    assert(!forever_mkdirs(prefix));
-    assert(forever_install_wow_config(share, prefix) == 0); /* neither installed */
-    for (unsigned i = 0; i < sizeof(channels) / sizeof(channels[0]); ++i)
-    {
-        snprintf(relative, sizeof(relative), "wow/prefix/drive_c/Program Files (x86)/World of Warcraft/%s/WTF/keep",
-                 channels[i]);
-        put(relative, "");
-    }
-    assert(forever_install_wow_config(share, prefix) == 0); /* directories alone are not an installation */
-    for (unsigned i = 0; i < sizeof(channels) / sizeof(channels[0]); ++i)
-    {
-        snprintf(relative, sizeof(relative), "wow/prefix/drive_c/Program Files (x86)/World of Warcraft/%s/%s",
-                 channels[i], executables[i]);
-        put(relative, "MZ");
-    }
-    assert(forever_install_wow_config(share, prefix) == (int)(sizeof(channels) / sizeof(channels[0])));
-    for (unsigned i = 0; i < sizeof(channels) / sizeof(channels[0]); ++i)
-    {
-        snprintf(relative, sizeof(relative), "wow/prefix/drive_c/Program Files (x86)/World of Warcraft/%s/WTF/Config.wtf",
-                 channels[i]);
-        assert(text_is(relative, preset));
-    }
-    assert(forever_install_wow_config(share, prefix) == 0);
-
-    /* Either channel's existing settings win independently of the other. */
-    for (unsigned existing = 0; existing < 2; ++existing)
-    {
-        snprintf(relative, sizeof(relative), "wow/prefix/drive_c/Program Files (x86)/World of Warcraft/%s/WTF/Config.wtf",
-                 channels[existing]);
-        put(relative, mine);
-        snprintf(relative, sizeof(relative), "wow/prefix/drive_c/Program Files (x86)/World of Warcraft/%s/WTF/Config.wtf",
-                 channels[1 - existing]);
-        path(config, relative);
-        assert(!unlink(config));
-        assert(forever_install_wow_config(share, prefix) == 1);
-        assert(text_is(relative, preset));
-        snprintf(relative, sizeof(relative), "wow/prefix/drive_c/Program Files (x86)/World of Warcraft/%s/WTF/Config.wtf",
-                 channels[existing]);
-        assert(text_is(relative, mine));
-        assert(forever_install_wow_config(share, prefix) == 0);
-        assert(text_is(relative, mine));
-    }
-}
-
 /* A prefix whose first wineboot never finished lacks the Program Files
  * folders; the Battle.net installer rejects its default location then. */
 static void test_standard_folders(void)
@@ -1076,16 +1022,16 @@ static void test_permission_message(void)
     assert(!forever_permission_error(-ENOENT));
     assert(forever_permission_message(
                message, sizeof(message),
-               "/data/forever/prefix/drive_c/wineps5-fg.txt",
-               "/data/forever/prefix") > 0);
+               "/data/5team/prefix/drive_c/wineps5-fg.txt",
+               "/data/5team/prefix") > 0);
     assert(!strcmp(message,
-        "Forever Launcher can't write to /data/forever/prefix/drive_c/wineps5-fg.txt "
+        "5team can't write to /data/5team/prefix/drive_c/wineps5-fg.txt "
         "(permission denied).\n"
-        "On a PC, use FTP to set /data/forever/prefix and everything in it to permission 777,\n"
-        "then start Forever Launcher again."));
+        "On a PC, use FTP to set /data/5team/prefix and everything in it to permission 777,\n"
+        "then start 5team again."));
     assert(!strcmp(forever_setting_permission_message(-EACCES),
-                   "Forever Launcher can't save this setting (permission denied).\n"
-                   "Close and start Forever Launcher again."));
+                   "5team can't save this setting (permission denied).\n"
+                   "Close and start 5team again."));
     assert(forever_setting_permission_message(-EPERM));
     assert(!forever_setting_permission_message(-EIO));
 }
@@ -1210,7 +1156,6 @@ int main(int argc, char **argv)
     test_managed_wrong_size();
     test_managed_manifest_guards();
     test_managed_repair_log_cap();
-    test_wow_config();
     test_standard_folders();
     test_permission_message();
 cleanup:;

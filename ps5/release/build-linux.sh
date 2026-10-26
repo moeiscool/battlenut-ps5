@@ -447,4 +447,4 @@ stage runtime-b1-dual make -s -C ps5/probes/psmkit-wine runtime-b1-dual
 stage package python3 ps5/release/package.py --tag "$tag"
 python3 "$cache_helper" prune --cache "$FOREVER_BUILD_CACHE" --keep 2
 python3 "$cache_helper" size --cache "$FOREVER_BUILD_CACHE"
-printf 'BUILD_COMPLETE seconds=%s zip=%s\n' "$((SECONDS - started))" "$wow/ps5/build/release/PPSA99030.zip"
+printf 'BUILD_COMPLETE seconds=%s zip=%s\n' "$((SECONDS - started))" "$wow/ps5/build/release/PPSA99031.zip"

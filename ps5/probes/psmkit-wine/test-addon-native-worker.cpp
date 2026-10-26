@@ -1,4 +1,4 @@
-// Forever Launcher - native add-on archive worker behavioral regressions.
+// 5team - native add-on archive worker behavioral regressions.
 // Copyright (C) 2026 bizkut
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "../../addon-worker/addon-worker.hpp"

@@ -10,14 +10,15 @@
 
 
 /* The only roots the broker may remove. The cached installer is index 3 and
- * is admitted only for reinstall. Shared with the title's pure path guard. */
+ * is admitted only for reinstall. Shared with the title's pure path guard.
+ * Steam's client, not the Steam folder: steamapps (the games) stays. */
 static inline const char *wb_menu_remove_relative(unsigned index, int reinstall)
 {
     static const char *const relative[] = {
-        "/drive_c/Program Files (x86)/Battle.net",
-        "/drive_c/ProgramData/Battle.net",
-        "/drive_c/users/steamuser/AppData/Local/Battle.net",
-        "/drive_c/Battle.net-Setup.exe",
+        "/drive_c/Program Files (x86)/Steam/steam.exe",
+        "/drive_c/Program Files (x86)/Steam/package",
+        "/drive_c/users/steamuser/AppData/Local/Steam",
+        "/drive_c/SteamSetup.exe",
     };
     return index < 3u + !!reinstall ? relative[index] : (const char *)0;
 }

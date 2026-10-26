@@ -1,0 +1,107 @@
+diff --git a/include/wine/ps5_title_private.h b/include/wine/ps5_title_private.h
+index 4a8e1a2..62e9073 100644
+--- a/include/wine/ps5_title_private.h
++++ b/include/wine/ps5_title_private.h
+@@ -739,15 +739,14 @@ static inline int wine_ps5_title_direct_cache_image( const uint16_t *image, size
+     return wine_ps5_title_refused_program( image, length, "Agent.exe", NULL ) != NULL;
+ }
+ 
+-/* Battle.net's real WoW game images are drive-qualified Wow*.exe files with
+- * a sibling <name>_loader.dll. The caller supplies the translated Unix image
+- * and performs the filesystem check, keeping this predicate host-testable. */
++/* Battle.net's supported game images are drive-qualified D2R.exe and
++ * "Diablo IV.exe" files. The caller supplies the translated Unix image and
++ * performs the filesystem check, keeping this predicate host-testable. */
+ static inline int wine_ps5_title_game_image( const char *dos, const char *unix_image,
+                                              int (*exists)( const char * ))
+ {
+-    const char *base, *dot, *slash;
+-    char loader[4096];
+-    size_t prefix, length;
++    static const char *const games[] = {"D2R.exe", "Diablo IV.exe"};
++    const char *base;
+ 
+     if (!dos || !unix_image || !exists ||
+         !((dos[0] == 'C' || dos[0] == 'c' || dos[0] == 'W' || dos[0] == 'w') &&
+@@ -755,25 +754,13 @@ static inline int wine_ps5_title_game_image( const char *dos, const char *unix_i
+         return 0;
+     base = dos;
+     for (const char *p = dos; *p; ++p) if (*p == '\\' || *p == '/') base = p + 1;
+-    length = strlen( base );
+-    if (length < 7 || !((base[0] | 32) == 'w' && (base[1] | 32) == 'o' &&
+-                        (base[2] | 32) == 'w')) return 0;
+-    dot = base + length - 4;
+-    if ((dot[0] | 32) != '.' || (dot[1] | 32) != 'e' ||
+-        (dot[2] | 32) != 'x' || (dot[3] | 32) != 'e') return 0;
+-    slash = strrchr( unix_image, '/' );
+-    prefix = slash ? (size_t)(slash + 1 - unix_image) : 0;
+-    length = strlen( slash ? slash + 1 : unix_image );
+-    if (length < 4 || prefix + length - 4 + sizeof("_loader.dll") > sizeof(loader)) return 0;
+-    memcpy( loader, unix_image, prefix + length - 4 );
+-    memcpy( loader + prefix + length - 4, "_loader.dll", sizeof("_loader.dll") );
+-    if (exists( loader )) return 1;
+-    /* Blizzard ships the final WoW.exe beside lowercase wow_loader.dll,
+-     * while beta uses WowB_loader.dll. Try the derived spelling first, then
+-     * a lowercase basename without changing the directory path. */
+-    for (size_t i = prefix; loader[i]; ++i)
+-        if (loader[i] >= 'A' && loader[i] <= 'Z') loader[i] += 'a' - 'A';
+-    return exists( loader );
++    for (size_t i = 0; i < sizeof(games) / sizeof(games[0]); ++i)
++    {
++        const char *a = base, *b = games[i];
++        while (*a && *b && (*a | 32) == (*b | 32)) ++a, ++b;
++        if (!*a && !*b) return exists( unix_image );
++    }
++    return 0;
+ }
+ 
+ /* Title-only encoding in get_directory_entries.max_count. The ordinary Wine
+diff --git a/loader/tests/ps5_title.c b/loader/tests/ps5_title.c
+index f428b73..3ac7995 100644
+--- a/loader/tests/ps5_title.c
++++ b/loader/tests/ps5_title.c
+@@ -1197,28 +1197,27 @@ static void test_hdr_luminance_edid(void)
+     puts( "ps5 hdr edid: Wine identity, runtime ABI, CTA luminance codes, BT.2020/D65 and checksums PASS" );
+ }
+ 
+-static int game_loader_exists( const char *path )
++static int game_image_exists( const char *path )
+ {
+-    return !strcmp( path, "/prefix/drive_c/WoW/WowB_loader.dll" ) ||
+-           !strcmp( path, "/prefix/drive_c/WoW/wOwTest_loader.dll" ) ||
+-           !strcmp( path, "/prefix/drive_c/WoW/wow_loader.dll" );
++    return !strcmp( path, "/prefix/drive_c/Diablo IV/Diablo IV.exe" ) ||
++           !strcmp( path, "/prefix/drive_c/D2R/d2r.EXE" );
+ }
+ 
+ static void test_game_image_rule(void)
+ {
+-    assert( wine_ps5_title_game_image( "C:\\WoW\\WowB.exe",
+-                                      "/prefix/drive_c/WoW/WowB.exe", game_loader_exists ) );
+-    assert( wine_ps5_title_game_image( "w:\\WoW\\wOwTest.ExE",
+-                                      "/prefix/drive_c/WoW/wOwTest.ExE", game_loader_exists ) );
+-    assert( wine_ps5_title_game_image( "C:\\WoW\\WoW.exe",
+-                                      "/prefix/drive_c/WoW/WoW.exe", game_loader_exists ) );
+-    assert( !wine_ps5_title_game_image( "C:\\WoW\\WowVoiceProxy.exe",
+-                                       "/prefix/drive_c/WoW/WowVoiceProxy.exe", game_loader_exists ) );
+-    assert( !wine_ps5_title_game_image( "Z:\\WoW\\WowB.exe",
+-                                       "/prefix/drive_c/WoW/WowB.exe", game_loader_exists ) );
+-    assert( !wine_ps5_title_game_image( "C:\\WoW\\Other.exe",
+-                                       "/prefix/drive_c/WoW/Other.exe", game_loader_exists ) );
+-    puts( "ps5 game image: Wow*.exe plus sibling loader, C/W drives, case-insensitive rule PASS" );
++    assert( wine_ps5_title_game_image( "C:\\Diablo IV\\Diablo IV.exe",
++                                      "/prefix/drive_c/Diablo IV/Diablo IV.exe", game_image_exists ) );
++    assert( wine_ps5_title_game_image( "w:\\D2R\\d2r.EXE",
++                                      "/prefix/drive_c/D2R/d2r.EXE", game_image_exists ) );
++    assert( !wine_ps5_title_game_image( "C:\\D2R\\D2R.exe",
++                                       "/prefix/drive_c/D2R/D2R.exe", game_image_exists ) );
++    assert( !wine_ps5_title_game_image( "Z:\\Diablo IV\\Diablo IV.exe",
++                                       "/prefix/drive_c/Diablo IV/Diablo IV.exe", game_image_exists ) );
++    assert( !wine_ps5_title_game_image( "C:\\WoW\\Wow.exe",
++                                       "/prefix/drive_c/WoW/Wow.exe", game_image_exists ) );
++    assert( !wine_ps5_title_game_image( "C:\\Diablo IV\\Diablo IV Launcher.exe",
++                                       "/prefix/drive_c/Diablo IV/Diablo IV Launcher.exe", game_image_exists ) );
++    puts( "ps5 game image: D2R.exe and Diablo IV.exe, C/W drives, case-insensitive rule PASS" );
+ }
+ 
+ static const char *match_refused_program( const char *image, const char *programs, size_t *match_length )

@@ -712,7 +712,7 @@ static void test_voice_menu(void)
     forever_menu_render(&menu, text, sizeof(text));
     assert(strstr(text, "SHA-256 mismatch") && strstr(text, "Voice-to-Text is off."));
     forever_menu_move(&menu, 1);
-    assert(menu.selected == FOREVER_MENU_ADDONS); /* Coming later is not pad-selectable */
+    assert(menu.selected == FOREVER_MENU_REINSTALL); /* Coming later and Add-ons are not pad-selectable */
     forever_menu_close(&menu);
     forever_menu_open(&menu, &values);
     assert(!menu.voice_downloading && !menu.status[0]);
@@ -801,68 +801,21 @@ static void test_key_rewrite(void)
     assert(text_is("switches/drive_c/duplicate.txt", "fg=on fg=off\n"));
 }
 
-static void install_channel(const char *channel, const char *executable)
-{
-    char relative[512];
-    snprintf(relative, sizeof(relative), "hdr/prefix/drive_c/Program Files (x86)/World of Warcraft/%s/%s",
-             channel, executable);
-    put(relative, "MZ");
-}
-
-static void test_hdr_config(void)
-{
-    char share[1024], prefix[1024], flag[1024];
-    int enabled = -1;
-
-    make_path(share, sizeof(share), "hdr/share");
-    make_path(prefix, sizeof(prefix), "hdr/prefix");
-    make_path(flag, sizeof(flag), "hdr/prefix/drive_c/wineps5-hdr-output.txt");
-    put("hdr/share/Config.wtf", "SET GxApi \"D3D12\"\nSET HDROutput \"1\"\nSET HDRFactor \"2\"\n");
-    install_channel("_forever_", "Wow.exe");
-    install_channel("_classic_beta_", "WowB.exe");
-    install_channel("_retail_", "Wow.exe");
-    install_channel("_classic_era_", "WowClassic.exe");
-    install_channel("_anniversary_", "WowClassic.exe");
-    install_channel("_future_", "wOwFuture.EXE");
-    put("hdr/prefix/drive_c/Program Files (x86)/World of Warcraft/_forever_/WTF/Config.wtf",
-        "SET mine \"keep\"\r\nSET HDROutput \"1\"\r\nSET HDRFactor \"1.7\"\r\n");
-
-    assert(forever_menu_set_wow_hdr(share, prefix, 0) == 6);
-    assert(text_is("hdr/prefix/drive_c/Program Files (x86)/World of Warcraft/_forever_/WTF/Config.wtf",
-                   "SET mine \"keep\"\r\nSET HDROutput \"0\"\r\nSET HDRFactor \"1.7\"\r\n"));
-    assert(text_is("hdr/prefix/drive_c/Program Files (x86)/World of Warcraft/_classic_beta_/WTF/Config.wtf",
-                   "SET GxApi \"D3D12\"\nSET HDROutput \"0\"\nSET HDRFactor \"2\"\n"));
-    assert(text_is("hdr/prefix/drive_c/Program Files (x86)/World of Warcraft/_retail_/WTF/Config.wtf",
-                   "SET GxApi \"D3D12\"\nSET HDROutput \"0\"\nSET HDRFactor \"2\"\n"));
-    assert(text_is("hdr/prefix/drive_c/Program Files (x86)/World of Warcraft/_future_/WTF/Config.wtf",
-                   "SET GxApi \"D3D12\"\nSET HDROutput \"0\"\nSET HDRFactor \"2\"\n"));
-    assert(!forever_menu_rewrite_switch(flag, "hdr", 0));
-    assert(!forever_menu_read_switch(flag, "hdr", 1, &enabled) && !enabled);
-    assert(!forever_menu_hdr_runtime_enabled(flag));
-
-    assert(forever_menu_set_wow_hdr(share, prefix, 1) == 6);
-    assert(text_is("hdr/prefix/drive_c/Program Files (x86)/World of Warcraft/_forever_/WTF/Config.wtf",
-                   "SET mine \"keep\"\r\nSET HDROutput \"1\"\r\nSET HDRFactor \"1.7\"\r\n"));
-    assert(!forever_menu_rewrite_switch(flag, "hdr", 1));
-    assert(forever_menu_hdr_runtime_enabled(flag));
-
-    make_path(flag, sizeof(flag), "hdr/missing-flag.txt");
-    assert(forever_menu_hdr_runtime_enabled(flag)); /* existing HDR-on profile is the fallback */
-}
-
 static void test_deletion_scope(void)
 {
     char prefix[512], path[1024];
 
     make_path(prefix, sizeof(prefix), "delete/prefix");
 
-    snprintf(path, sizeof(path), "%s/drive_c/Program Files (x86)/Battle.net/child", prefix);
+    snprintf(path, sizeof(path), "%s/drive_c/Program Files (x86)/Steam/package/child", prefix);
     assert(!forever_menu_delete_path_allowed(prefix, path, 0)); /* a child is never an allowed root */
     snprintf(path, sizeof(path), "%s/drive_c/Program Files (x86)/World of Warcraft", prefix);
     assert(!forever_menu_delete_path_allowed(prefix, path, 1));
-    snprintf(path, sizeof(path), "%s/drive_c/Program Files (x86)/Battle.net", prefix);
+    snprintf(path, sizeof(path), "%s/drive_c/Program Files (x86)/Steam", prefix);
+    assert(!forever_menu_delete_path_allowed(prefix, path, 1)); /* steamapps stays */
+    snprintf(path, sizeof(path), "%s/drive_c/Program Files (x86)/Steam/package", prefix);
     assert(forever_menu_delete_path_allowed(prefix, path, 0));
-    snprintf(path, sizeof(path), "%s/drive_c/Battle.net-Setup.exe", prefix);
+    snprintf(path, sizeof(path), "%s/drive_c/SteamSetup.exe", prefix);
     assert(!forever_menu_delete_path_allowed(prefix, path, 0));
     assert(forever_menu_delete_path_allowed(prefix, path, 1));
 
@@ -1029,9 +982,9 @@ static void test_exit_menu(void)
     forever_menu_open(&menu, &values);
     forever_menu_render(&menu, text, sizeof(text));
     close_row = strstr(text, " Close\n");
-    exit_row = strstr(text, " Exit Battle.net\n");
+    exit_row = strstr(text, " Exit Steam\n");
     assert(close_row && exit_row && close_row < exit_row);
-    assert(!strcmp(exit_row, " Exit Battle.net\n\n"));
+    assert(!strcmp(exit_row, " Exit Steam\n\n"));
     assert(FOREVER_MENU_LINE_EXIT == FOREVER_MENU_LINE_CLOSE + 1);
     forever_menu_move(&menu, -1);
     assert(menu.selected == FOREVER_MENU_EXIT);
@@ -1048,7 +1001,7 @@ static void test_exit_menu(void)
     assert(menu.selected == FOREVER_MENU_EXIT && menu.page == FOREVER_MENU_CONFIRM_EXIT);
     assert(!menu.confirmation_selected);
     forever_menu_render(&menu, text, sizeof(text));
-    assert(strstr(text, "Exit Battle.net and Forever Launcher?"));
+    assert(strstr(text, "Exit Steam and 5team?"));
     assert(strstr(text, "> Cancel\n") && strstr(text, "  Exit\n"));
     assert(forever_menu_select(&menu).command == FOREVER_MENU_COMMAND_NONE);
     assert(menu.page == FOREVER_MENU_MAIN && menu.selected == FOREVER_MENU_EXIT);
@@ -1102,7 +1055,10 @@ static void test_state_machine(void)
     forever_menu_move(&menu, 1);
     assert(menu.selected == FOREVER_MENU_VOICE);
     forever_menu_move(&menu, 1);
-    assert(menu.selected == FOREVER_MENU_ADDONS);
+    assert(menu.selected == FOREVER_MENU_REINSTALL);
+    forever_menu_render(&menu, text, sizeof(text));
+    assert(strstr(text, "Add-ons\tNot available"));
+    menu.selected = FOREVER_MENU_ADDONS; /* the add-on page remains for WoW builds */
     result = forever_menu_select(&menu);
     assert(result.command == FOREVER_MENU_COMMAND_ADDONS_OPEN);
     assert(menu.page == FOREVER_MENU_ADDON_PAGE && menu.addon_loading);
@@ -1253,7 +1209,8 @@ static void test_state_machine(void)
     result = forever_menu_back(&menu);
     assert(result.command == FOREVER_MENU_COMMAND_NONE && menu.page == FOREVER_MENU_MAIN);
     result = forever_menu_click_line(&menu, FOREVER_MENU_LINE_ADDONS);
-    assert(result.command == FOREVER_MENU_COMMAND_ADDONS_OPEN);
+    assert(result.command == FOREVER_MENU_COMMAND_NONE && menu.page == FOREVER_MENU_MAIN);
+    assert(strstr(menu.status, "only available for World of Warcraft"));
 
     forever_menu_open(&menu, &values);
     result = forever_menu_click_line(&menu, FOREVER_MENU_LINE_FRAME_GENERATION);
@@ -1322,7 +1279,6 @@ int main(void)
     test_download_redirects();
     test_mouse_scroll_menu();
     test_voice_menu();
-    test_hdr_config();
     test_deletion_scope();
     test_state_machine();
     test_exit_menu();

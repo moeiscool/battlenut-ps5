@@ -115,7 +115,7 @@ static inline int pw_game_request_unpack(const struct pw_game_request *request,
 }
 /* Only typed, credential-free launch options may be persisted. A deny-list
  * cannot distinguish an opaque session value from game configuration.
- * This option policy is independent of products, channels and exe names. */
+ * Only a uid from the supported game table is kept. */
 static inline int pw_game_record_arguments(char *const *program, char **saved, unsigned *argc)
 {
     size_t bytes = 0;
@@ -161,7 +161,7 @@ static inline int pw_game_record_arguments(char *const *program, char **saved, u
         }
         value = *end ? end + 1 : i + 1 < count ? program[++i] : "";
         if (uid)
-            valid = !strncasecmp(value, "wow", 3) && wow_product_valid(value);
+            valid = wow_uid_valid(value);
         else
         {
             length = strlen(value);

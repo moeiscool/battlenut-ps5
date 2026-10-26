@@ -1,4 +1,4 @@
-/* First-start and every-start setup of the user data in /data/forever.
+/* First-start and every-start setup of the user data in /data/5team.
  *
  * The app folder is replaced by every store update, so everything the user
  * owns (the Wine prefix with Battle.net and the games, HOME, the shader cache)
@@ -40,9 +40,9 @@ static inline int forever_permission_message(
 {
     int length = snprintf(
         message, size,
-        "Forever Launcher can't write to %s (permission denied).\n"
+        "5team can't write to %s (permission denied).\n"
         "On a PC, use FTP to set %s and everything in it to permission 777,\n"
-        "then start Forever Launcher again.",
+        "then start 5team again.",
         path, repair_root);
     if (length < 0) return -EIO;
     return (size_t)length < size ? length : -ENAMETOOLONG;
@@ -51,8 +51,8 @@ static inline int forever_permission_message(
 static inline const char *forever_setting_permission_message(int result)
 {
     return forever_permission_error(result) ?
-        "Forever Launcher can't save this setting (permission denied).\n"
-        "Close and start Forever Launcher again." : NULL;
+        "5team can't save this setting (permission denied).\n"
+        "Close and start 5team again." : NULL;
 }
 
 static inline int forever_exists(const char *path)
@@ -902,32 +902,6 @@ static inline int forever_sync_managed(const char *app_root, const char *list_pa
                                            report->state_publish_result);
     }
     return (int)report->repaired;
-}
-
-/* Each installed executable gets the preset only if its own file is absent. */
-struct forever_wow_config_context { const char *share; int installed; };
-static inline int forever_wow_config_visit(const struct wow_channel *channel, void *opaque)
-{
-    struct forever_wow_config_context *context = opaque;
-    char wtf[WOW_PATH_BYTES], config[WOW_PATH_BYTES], source[WOW_PATH_BYTES];
-    struct stat status;
-    int error;
-    if (!channel->executable[0]) return 0;
-    if ((error = wow_join(wtf, sizeof(wtf), channel->unix_cwd, "WTF")) ||
-        (error = wow_join(config, sizeof(config), wtf, "Config.wtf"))) return error;
-    if (!stat(config, &status)) return 0;
-    if (errno != ENOENT) return -errno;
-    if ((error = wow_join(source, sizeof(source), context->share, "Config.wtf")) ||
-        (error = forever_mkdirs(wtf)) ||
-        (error = forever_copy_file(source, config, NULL))) return error;
-    ++context->installed;
-    return 0;
-}
-static inline int forever_install_wow_config(const char *share, const char *prefix)
-{
-    struct forever_wow_config_context context = {share, 0};
-    int error = wow_channels_scan(prefix, forever_wow_config_visit, &context);
-    return error ? error : context.installed;
 }
 
 #endif

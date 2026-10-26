@@ -30,7 +30,7 @@ static void say(const char *format, ...)
 
 static int guarded_action(void)
 {
-    static const WCHAR prefix[] = L"/data/forever/issue6-fresh/prefix";
+    static const WCHAR prefix[] = L"/data/5team/issue6-fresh/prefix";
     static const WCHAR marker[] = L"C:\\SignatureQA-issue6\\qa-disposable-prefix.flag";
     static const char remove[] = "FOREVER ISSUE6 DISPOSABLE PREFIX\nACTION=DELETE\n";
     static const char restore[] = "FOREVER ISSUE6 DISPOSABLE PREFIX\nACTION=REGISTER\n";

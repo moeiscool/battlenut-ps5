@@ -11,7 +11,6 @@ static const enum forever_menu_item selectable[] = {
     FOREVER_MENU_HUD,
     FOREVER_MENU_INVERT_SCROLL,
     FOREVER_MENU_VOICE,
-    FOREVER_MENU_ADDONS,
     FOREVER_MENU_REINSTALL,
     FOREVER_MENU_UNINSTALL,
     FOREVER_MENU_CLOSE,
@@ -755,7 +754,9 @@ struct forever_menu_result forever_menu_click_line(struct forever_menu_state *me
         case FOREVER_MENU_LINE_PROXIMITY_VOICE:
             copy_status(menu, "Proximity Voice Chat is coming later.");
             return none();
-        case FOREVER_MENU_LINE_ADDONS: menu->selected = FOREVER_MENU_ADDONS; break;
+        case FOREVER_MENU_LINE_ADDONS:
+            copy_status(menu, "Add-ons are only available for World of Warcraft.");
+            return none();
         case FOREVER_MENU_LINE_REINSTALL: menu->selected = FOREVER_MENU_REINSTALL; break;
         case FOREVER_MENU_LINE_UNINSTALL: menu->selected = FOREVER_MENU_UNINSTALL; break;
         case FOREVER_MENU_LINE_CLOSE: menu->selected = FOREVER_MENU_CLOSE; break;
@@ -946,7 +947,7 @@ void forever_menu_render(const struct forever_menu_state *menu, char *text, size
     if (menu->page == FOREVER_MENU_MAIN)
     {
         snprintf(text, size,
-                 " Forever Launcher\n"
+                 " 5team\n"
                  " ---------------------------------------------\n"
                  "%s Frame generation\t%s\n"
                  "%s HDR\t%s\n"
@@ -955,13 +956,13 @@ void forever_menu_render(const struct forever_menu_state *menu, char *text, size
                  "%s Voice-to-Text\t%s\n"
                  "  Proximity Voice Chat\tComing later\n"
                  " ---------------------------------------------\n"
-                 "%s Add-ons...\tManage\n"
+                 "  Add-ons\tNot available\n"
                  " ---------------------------------------------\n"
-                 "%s Reinstall Battle.net...\n"
-                 "%s Uninstall Battle.net...\n"
+                 "%s Reinstall Steam...\n"
+                 "%s Uninstall Steam...\n"
                  " ---------------------------------------------\n"
                  "%s Close\n"
-                 "%s Exit Battle.net\n"
+                 "%s Exit Steam\n"
                  "\n%s",
                  mark(menu->selected == FOREVER_MENU_FRAME_GENERATION),
                  frame_generation_name(menu->values.frame_generation),
@@ -970,7 +971,6 @@ void forever_menu_render(const struct forever_menu_state *menu, char *text, size
                  mark(menu->selected == FOREVER_MENU_INVERT_SCROLL),
                  menu->values.invert_scroll ? "On" : "Off",
                  mark(menu->selected == FOREVER_MENU_VOICE), menu->values.voice ? "On" : "Off",
-                 mark(menu->selected == FOREVER_MENU_ADDONS),
                  mark(menu->selected == FOREVER_MENU_REINSTALL),
                  mark(menu->selected == FOREVER_MENU_UNINSTALL),
                  mark(menu->selected == FOREVER_MENU_CLOSE),
@@ -1022,35 +1022,35 @@ void forever_menu_render(const struct forever_menu_state *menu, char *text, size
     if (menu->page == FOREVER_MENU_CONFIRM_REINSTALL)
     {
         snprintf(text, size,
-                 " Reinstall Battle.net?\n"
+                 " Reinstall Steam?\n"
                  " ---------------------------------------------\n"
-                 " Stops Battle.net and its update agent, removes\n"
-                 " their files, and downloads a fresh installer.\n"
+                 " Stops Steam, removes its client files, and\n"
+                 " downloads a fresh installer.\n"
                  " Installed games and their settings stay.\n"
                  "\n"
-                 "\n%s Cancel\n%s Reinstall Battle.net\n",
+                 "\n%s Cancel\n%s Reinstall Steam\n",
                  mark(!menu->confirmation_selected), mark(menu->confirmation_selected));
         return;
     }
     if (menu->page == FOREVER_MENU_CONFIRM_UNINSTALL)
     {
         snprintf(text, size,
-                 " Uninstall Battle.net?\n"
+                 " Uninstall Steam?\n"
                  " ---------------------------------------------\n"
-                 " Removes Battle.net and its update agent.\n"
+                 " Removes the Steam client.\n"
                  " Installed games and their settings stay.\n"
                  "\n"
                  "\n"
-                 "\n%s Cancel\n%s Uninstall Battle.net\n",
+                 "\n%s Cancel\n%s Uninstall Steam\n",
                  mark(!menu->confirmation_selected), mark(menu->confirmation_selected));
         return;
     }
     if (menu->page == FOREVER_MENU_CONFIRM_EXIT)
     {
         snprintf(text, size,
-                 " Exit Battle.net and Forever Launcher?\n"
+                 " Exit Steam and 5team?\n"
                  " ---------------------------------------------\n"
-                 " Stops Battle.net and its update agent, then\n"
+                 " Stops Steam, then\n"
                  " returns to the PS5 home screen.\n"
                  " Installed games and their settings stay.\n"
                  "\n"
@@ -1058,6 +1058,6 @@ void forever_menu_render(const struct forever_menu_state *menu, char *text, size
                  mark(!menu->confirmation_selected), mark(menu->confirmation_selected));
         return;
     }
-    snprintf(text, size, " Forever Launcher\n ---------------------------------------------\n\n %s",
+    snprintf(text, size, " 5team\n ---------------------------------------------\n\n %s",
              menu->status);
 }

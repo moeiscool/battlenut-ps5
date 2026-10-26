@@ -15,7 +15,7 @@ ADDON_WORKER_RELATIVE = 'addon-worker.elf'
 ADDON_WORKER_MAX_BYTES = 2 * 1024 * 1024
 # User data outside the app folder, which a store update replaces. ShadowMountPlus
 # 1.7beta3+ mounts /data into the title's sandbox.
-USER_DATA_ROOT = '/data/forever'
+USER_DATA_ROOT = '/data/5team'
 
 
 def _valid_hdr_mode(setting):
@@ -129,6 +129,32 @@ def builtin_prefix_files(tree):
     return owned
 
 
+# Windows launchers the B1 maintenance title can download, install and start.
+# installer_switch is passed to the installer after its DOS path ('' for none).
+LAUNCHERS = {
+    'battlenet': {
+        'launcher_name': 'Battle.net',
+        'installer_url': 'https://downloader.battle.net//download/getInstallerForGame?os=win&gameProgram=BATTLENET_APP&version=Live',
+        # Direct versioned file, tried only when the Live redirect download fails.
+        'installer_fallback_url': 'https://downloader.battle.net/download/installer/win/1.0.66/Battle.net-Setup.exe',
+        'installer_file': 'Battle.net-Setup.exe',
+        'installer_switch': '',
+        'launcher_dir': 'Battle.net',
+        'launcher_exe': 'Battle.net Launcher.exe',
+    },
+    'steam': {
+        'launcher_name': 'Steam',
+        'installer_url': 'https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe',
+        'installer_fallback_url': 'https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe',
+        'installer_file': 'SteamSetup.exe',
+        # NSIS silent install into its default Program Files (x86)\Steam.
+        'installer_switch': '/S',
+        'launcher_dir': 'Steam',
+        'launcher_exe': 'steam.exe',
+    },
+}
+
+
 def profile(name, overrides=None):
     if name not in ('p1w', 'b1'):
         raise ValueError(f'unknown title runtime profile: {name}')
@@ -138,7 +164,7 @@ def profile(name, overrides=None):
     loader = root + '/lib/wine/x86_64-unix/wine'
     selected = {
         'name': name, 'root': root,
-        'remote_root': '/data/homebrew/PPSA99030/' + root.removeprefix('/app0/'),
+        'remote_root': '/data/homebrew/PPSA99031/' + root.removeprefix('/app0/'),
         'loader': loader, 'prefix': fixture + '/prefix', 'home': fixture + '/home',
         'server': root + '/server-title' if b1 else fixture + '/server-title',
         'debug': 'err+all,fixme+all,+seh,+loaddll' if b1 else '+seh',
@@ -149,10 +175,7 @@ def profile(name, overrides=None):
         'dll_overrides': ('winemenubuilder.exe=d;mscoree=d;mshtml=d;winedbg.exe=d;'
                           'msv1_0=d;kerberos=d;tabtip.exe=d') if b1 else None,
         **({'headless': False, 'gpu': False,
-            'installer_url': 'https://downloader.battle.net//download/getInstallerForGame?os=win&gameProgram=BATTLENET_APP&version=Live',
-            # Direct versioned file, tried only when the Live redirect download fails.
-            'installer_fallback_url': 'https://downloader.battle.net/download/installer/win/1.0.66/Battle.net-Setup.exe',
-            'installer_dos': r'C:\Battle.net-Setup.exe',
+            'launcher': 'battlenet',
             'payload_programs': [],
             'refused_programs': [],
             'prefetch_hosts': [],
@@ -178,7 +201,8 @@ def profile(name, overrides=None):
             raise ValueError('profile overrides are a B1 JSON object only')
         allowed = {'argv', 'cwd', 'prefix', 'home', 'dll_overrides', 'child_dll_overrides',
                    'debug', 'headless', 'payload_programs', 'refused_programs',
-                   'browser_switches', 'gpu', 'runtime_game', 'environment', 'prefetch_hosts', 'dns_upstreams'}
+                   'browser_switches', 'gpu', 'runtime_game', 'environment', 'prefetch_hosts', 'dns_upstreams',
+                   'launcher'}
         if overrides.keys() - allowed:
             raise ValueError(f'unsupported B1 profile inputs: {sorted(overrides.keys()-allowed)}')
         for key, value in overrides.items():
@@ -262,6 +286,10 @@ def profile(name, overrides=None):
                         for program, switches in value.items()):
                     raise ValueError('B1 browser_switches maps program file names to lists of --switches')
                 selected[key] = value
+            elif key == 'launcher':
+                if value not in LAUNCHERS:
+                    raise ValueError(f'B1 launcher must be one of {sorted(LAUNCHERS)}')
+                selected[key] = value
             elif key in ('headless', 'gpu', 'runtime_game'):
                 if not isinstance(value, bool):
                     raise ValueError(f'B1 {key} must be a boolean')
@@ -300,8 +328,13 @@ def profile(name, overrides=None):
             for version in (1, 2, 3, 4):
                 module = f'xinput1_{version}.so'
                 selected['module_paths'][module] = root + '/lib/wine/x86_64-unix/' + module
-        selected['launcher_unix'] = selected['prefix'] + '/drive_c/Program Files (x86)/Battle.net/Battle.net Launcher.exe'
-        selected['installer_unix'] = selected['prefix'] + '/drive_c/Battle.net-Setup.exe'
+        launcher = LAUNCHERS[selected['launcher']]
+        for key in ('launcher_name', 'installer_url', 'installer_fallback_url', 'installer_switch'):
+            selected[key] = launcher[key]
+        selected['installer_dos'] = 'C:\\' + launcher['installer_file']
+        selected['launcher_unix'] = (selected['prefix'] + '/drive_c/Program Files (x86)/' +
+                                     launcher['launcher_dir'] + '/' + launcher['launcher_exe'])
+        selected['installer_unix'] = selected['prefix'] + '/drive_c/' + launcher['installer_file']
         selected['installer_cwd'] = selected['prefix'] + '/drive_c'
     return selected
 
@@ -382,6 +415,7 @@ def qualified_b1_folder(folder):
         'refused_programs': supplied.get('refused_programs', []),
         'prefetch_hosts': supplied.get('prefetch_hosts', []),
         'dns_upstreams': supplied.get('dns_upstreams', []),
+        'launcher': supplied.get('launcher', 'battlenet'),
         **({'browser_switches': supplied['browser_switches']} if supplied.get('browser_switches') else {}),
         **({'gpu': supplied['gpu']} if supplied.get('gpu') else {}),
         **({'child_dll_overrides': supplied['child_dll_overrides']}
@@ -401,6 +435,7 @@ def qualified_b1_folder(folder):
             'refused_programs': game_supplied.get('refused_programs', []),
             'prefetch_hosts': game_supplied.get('prefetch_hosts', []),
             'dns_upstreams': game_supplied.get('dns_upstreams', []),
+            'launcher': game_supplied.get('launcher', 'battlenet'),
             **({'browser_switches': game_supplied['browser_switches']} if game_supplied.get('browser_switches') else {}),
             'gpu': True,
             **({'child_dll_overrides': game_supplied['child_dll_overrides']}

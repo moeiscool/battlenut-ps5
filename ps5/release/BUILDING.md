@@ -1,4 +1,4 @@
-# Building Forever Launcher on Linux
+# Building 5team on Linux
 
 Use an x86-64 Linux host with Docker and a fresh, writable source directory.
 No console, shared SDK, remote RADV build, prefix, installed game, or Mac build
@@ -56,7 +56,7 @@ Outputs under `ps5-wow/ps5/build/`:
 
 - `whisper/{include,lib}`: target speech-engine headers and five static archives.
 - `title-psmkit-wine-b1/`: independently qualified maintenance and game roles.
-- `release/PPSA99030.zip`: catalog archive, with size and SHA-256 in the output.
+- `release/PPSA99031.zip`: catalog archive, with size and SHA-256 in the output.
 - `release/logs/`: complete per-stage logs and `timings.tsv` (seconds/status).
 
 ### Voice-to-Text dependencies
@@ -126,7 +126,7 @@ Each visible recording session logs `voice overlay format=<VkFormat> shown=<0|1>
 once, with no transcript or microphone data.
 
 At the first touchpad press the game parent logs
-`voice setting path=/data/forever/prefix/drive_c/wineps5-voice.txt rc=<errno>`.
+`voice setting path=/data/5team/prefix/drive_c/wineps5-voice.txt rc=<errno>`.
 Every press end logs
 `voice hold enabled=<0|1> result=<passthrough|click|drag|record> held_ms=<uint> max_move=<uint> setting_rc=<errno>`.
 The setting result is the `fopen` errno (0 on success, -1 if not attempted);
@@ -209,7 +209,7 @@ here is a host build/inspection gate, **not console execution**.
   modes only within fixed launcher-data roots. Traversal is descriptor-relative,
   no-follow, bounded, hard-link-safe, and stays on `/data`'s filesystem device.
 - The broker token intentionally retains the existing protocol's `0644` mode in
-  the normally `0777` `/data/forever` directory. It authenticates cooperative
+  the normally `0777` `/data/5team` directory. It authenticates cooperative
   title clients but is readable by other local identities that can traverse the
   directory; this release does not redesign the token scheme.
 
@@ -365,7 +365,7 @@ here is a host build/inspection gate, **not console execution**.
   exposing drawing in progress to the compositor, fixing the installer's
   crawling flicker.
 - Windows disk-space queries use the write broker's real storage counters for
-  `/data/forever`. An older or unavailable broker retains the previous synthetic
+  `/data/5team`. An older or unavailable broker retains the previous synthetic
   16 GiB free-space answer.
 - The desktop background uses the drawn purple picture again.
 
@@ -489,7 +489,7 @@ Discovery still lists incomplete/ambiguous channels for settings and Add-ons
 with an empty loader; they do not block maintenance startup or other channels.
 
 The maintenance parent records each accepted Battle.net Play launch under
-`/data/forever/state/last-launch-_<channel>_.bin`. The record contains the
+`/data/5team/state/last-launch-_<channel>_.bin`. The record contains the
 existing versioned, NUL-separated argv/cwd wire (at most 4,096 bytes and 64
 game arguments), not native pointers. Direct start replays that channel's
 record, preserving safe game options and Agent UID differences without
@@ -521,7 +521,7 @@ safe option. This intentionally does not preserve arbitrary launch options:
 opaque values cannot be proven free of credentials. Replay rechecks the same
 allow-list. Only argument counts and redacted argv/cwd markers are logged.
 
-The single `b1-game-wow.json` has `runtime_game: true`, with no configured
+The single `b1-game-diablo.json` has `runtime_game: true`, with no configured
 executable, argv, uid or channel cwd. `runtime-b1-dual` still separately builds
 and qualifies maintenance and GPU roles; profile reconstruction validates both
 standalone and combined runtime-game receipts. The GPU parent requires the
@@ -837,7 +837,7 @@ The `.012` sources retain the two independent drive-reporting fixes:
 - Wine's `server/directory.c` initializes the PS5 in-process server's `C:` and
   `W:` links in `\??` with fd-backed `\Device\HarddiskVolume1` and
   `\Device\HarddiskVolume2` devices. `C:` maps to the prefix's `drive_c`; `W:`
-  maps to the prefix's parent (`/data/forever` by default). Ordinary file
+  maps to the prefix's parent (`/data/5team` by default). Ordinary file
   access alone did not populate the object namespace used for drive enumeration.
 - The SDK's `platform/src/libc.c` sets `MNT_LOCAL` in its FreeBSD
   `statfs`/`fstatfs` responses. Without this flag Wine classified the console's
@@ -969,7 +969,7 @@ runtime, full title build or console execution is needed for this regression.
 ## Native release gate
 
 Before publishing the corrected release or promoting its catalog entry, install
-the exact final `PPSA99030.zip` on the PS5. Repeat the unchanged raw drive probe
+the exact final `PPSA99031.zip` on the PS5. Repeat the unchanged raw drive probe
 in both 32-bit and 64-bit modes, then run Wine's opt-in, read-only regression
 `kernel32_test.exe volume ps5-title-drives` in both architectures. Require only
 `C:`/`W:` in drive enumeration, local fixed-disk device information for both

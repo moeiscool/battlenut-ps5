@@ -39,17 +39,17 @@ p1w = profile('p1w')
 product = json.loads(Path(__file__).with_name('b1-product.json').read_text())
 assert product['debug'] == 'err+all,err-seh'
 assert product['argv'] == [r'C:\Forever\Addons\forever-maintenance.exe']
-game_config = json.loads(Path(__file__).with_name('b1-game-wow.json').read_text())
+game_config = json.loads(Path(__file__).with_name('b1-game-diablo.json').read_text())
 maintenance = profile('b1', product)
 assert maintenance['refused_programs'] == []
-assert 'B1_GAME_PROFILE_CONFIG ?= $(CURDIR)/b1-game-wow.json' in (
+assert 'B1_GAME_PROFILE_CONFIG ?= $(CURDIR)/b1-game-diablo.json' in (
     Path(__file__).with_name('Makefile').read_text())
 game = profile('b1', game_config)
 assert 'argv' not in game_config and 'cwd' not in game_config
 assert game['argv'] == [game['loader']]
 assert game['cwd'] is None and game['runtime_game'] is True
-assert game['prefix'] == '/data/forever/prefix'
-assert game['home'] == '/data/forever/home'
+assert game['prefix'] == '/data/5team/prefix'
+assert game['home'] == '/data/5team/home'
 assert game['gpu'] is True and game['headless'] is True
 assert game['refused_programs'] == ['BlizzardError.exe']
 assert game['environment'] == {'PROTON_ENABLE_HDR': '1'}
@@ -109,7 +109,7 @@ game_wine_entry = startup_main.index('wine_public_title_main(parent_argc,args)')
 assert setup_gate < direct_handoff < game_wine_entry
 assert 'return 1;' in startup_main[setup_gate:direct_handoff]
 sync_stage = native_startup.split('static int pw_forever_start(void)', 1)[1].split(
-    'result = forever_install_wow_config', 1)[0]
+    '\n}\n', 1)[0]
 assert 'result = pw_forever_sync_managed();' in sync_stage
 assert 'if (result < 0)' in sync_stage.split('result = pw_forever_sync_managed();', 1)[1]
 assert 'return -1;' in sync_stage.split('io_log("forever: app-owned prefix files', 1)[1]
@@ -229,6 +229,24 @@ for key in ('installer_url', 'installer_fallback_url', 'installer_dos', 'launche
         pass
     else:
         raise AssertionError(f'B1 profile accepted overridable installer field: {key}')
+assert b1['launcher'] == 'battlenet' and b1['launcher_name'] == 'Battle.net'
+assert b1['installer_switch'] == ''
+steam = maintenance
+assert steam['launcher_name'] == 'Steam'
+assert steam['installer_dos'] == r'C:\SteamSetup.exe'
+assert steam['installer_switch'] == '/S'
+assert steam['installer_url'].startswith('https://') and steam['installer_url'].endswith('/SteamSetup.exe')
+assert steam['launcher_unix'] == '/data/5team/prefix/drive_c/Program Files (x86)/Steam/steam.exe'
+assert steam['installer_unix'] == '/data/5team/prefix/drive_c/SteamSetup.exe'
+assert steam['cwd'].endswith('/Program Files (x86)/Steam')
+assert 'steamwebhelper.exe' in steam['browser_switches']
+for launcher in ('', 'origin', None, True):
+    try:
+        profile('b1', {'launcher': launcher})
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f'B1 accepted unknown launcher: {launcher!r}')
 relocated = profile('b1', {'prefix': '/app0/wine/prefix'})
 assert relocated['installer_unix'] == '/app0/wine/prefix/drive_c/Battle.net-Setup.exe'
 assert relocated['launcher_unix'] == '/app0/wine/prefix/drive_c/Program Files (x86)/Battle.net/Battle.net Launcher.exe'
@@ -404,7 +422,7 @@ with tempfile.TemporaryDirectory(prefix='pw-b1-profile-') as temporary:
             if relative in (WRITEBROKER_RELATIVE, ADDON_WORKER_RELATIVE)
             else relative.encode())
     manifest = runtime_tree_manifest(root, b1)
-    assert manifest['remote_root'] == '/data/homebrew/PPSA99030/wine-title'
+    assert manifest['remote_root'] == '/data/homebrew/PPSA99031/wine-title'
     assert manifest['pe_dll_counts'] == {'i386': 1, 'x86_64': 1}
     assert manifest['files']['share/wine/nls/locale.nls']['sha256'] == hashlib.sha256(
         b'share/wine/nls/locale.nls').hexdigest()
@@ -423,11 +441,11 @@ with tempfile.TemporaryDirectory(prefix='pw-b1-profile-') as temporary:
         path = folder / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(b'published')
-    guards = b1_guard_paths(folder, '/data/homebrew/PPSA99030')
-    assert '/data/homebrew/PPSA99030/wine/boot.txt' in guards
-    assert '/data/homebrew/PPSA99030/assets/icon0.png' in guards
-    assert '/data/homebrew/PPSA99030/.upload-eboot.bin' in guards
-    assert '/data/homebrew/PPSA99030/sce_sys/.upload-param.json' in guards
+    guards = b1_guard_paths(folder, '/data/homebrew/PPSA99031')
+    assert '/data/homebrew/PPSA99031/wine/boot.txt' in guards
+    assert '/data/homebrew/PPSA99031/assets/icon0.png' in guards
+    assert '/data/homebrew/PPSA99031/.upload-eboot.bin' in guards
+    assert '/data/homebrew/PPSA99031/sce_sys/.upload-param.json' in guards
     assert not any('/wine/lib/wine/' in path or '/wine-title/' in path for path in guards)
     (root / 'title-root-manifest.json').write_text(json.dumps(manifest, sort_keys=True))
     shutil.copytree(root, folder / 'wine-title')
@@ -527,7 +545,7 @@ with tempfile.TemporaryDirectory(prefix='pw-b1-profile-') as temporary:
     try:
         (folder / 'wine').mkdir()
         (folder / 'wine/bad.dll').write_bytes(b'bad')
-        b1_guard_paths(folder, '/data/homebrew/PPSA99030')
+        b1_guard_paths(folder, '/data/homebrew/PPSA99031')
     except ValueError:
         pass
     else:

@@ -203,17 +203,16 @@ static void serve(SOCKET client)
     }
 }
 
-static HANDLE start_battlenet(void)
+static HANDLE start_steam(void)
 {
     static const char explorer[] = "C:\\windows\\system32\\explorer.exe";
     STARTUPINFOA startup = {.cb = sizeof(startup)};
     PROCESS_INFORMATION process;
     char command[] =
-        "explorer.exe /desktop \"C:\\Program Files (x86)\\Battle.net\\Battle.net Launcher.exe\" "
-        "\"--exec=launch_uid wow_classic_beta\"";
+        "explorer.exe /desktop \"C:\\Program Files (x86)\\Steam\\steam.exe\"";
     memset(&process, 0, sizeof(process));
     if (!CreateProcessA(explorer, command, NULL, NULL, FALSE, 0, NULL,
-                        "C:\\Program Files (x86)\\Battle.net", &startup, &process))
+                        "C:\\Program Files (x86)\\Steam", &startup, &process))
         return NULL;
     CloseHandle(process.hThread);
     return process.hProcess;
@@ -222,7 +221,7 @@ static HANDLE start_battlenet(void)
 int main(void)
 {
     WSADATA winsock;
-    HANDLE battlenet;
+    HANDLE steam;
     SOCKET listener = INVALID_SOCKET;
     struct sockaddr_in address;
     int reuse = 1;
@@ -233,11 +232,11 @@ int main(void)
         "FOREVER_ADDONS_CONTROL_TOKEN", control_secret, sizeof(control_secret));
     SetEnvironmentVariableA("FOREVER_ADDONS_CONTROL_TOKEN", NULL);
     control_available = addonforge_control_secret_available(control_secret, secret_length);
-    battlenet = start_battlenet();
-    if (!battlenet) return 1;
+    steam = start_steam();
+    if (!steam) return 1;
     if (!control_available)
     {
-        while (WaitForSingleObject(battlenet, 250) == WAIT_TIMEOUT) {}
+        while (WaitForSingleObject(steam, 250) == WAIT_TIMEOUT) {}
         goto done;
     }
     if (WSAStartup(MAKEWORD(2, 2), &winsock)) goto done;
@@ -255,7 +254,7 @@ int main(void)
     {
         fd_set reads;
         struct timeval timeout = {.tv_sec = 0, .tv_usec = 250000};
-        if (WaitForSingleObject(battlenet, 0) == WAIT_OBJECT_0) break;
+        if (WaitForSingleObject(steam, 0) == WAIT_OBJECT_0) break;
         FD_ZERO(&reads);
         FD_SET(listener, &reads);
         if (select(0, &reads, NULL, NULL, &timeout) > 0 && FD_ISSET(listener, &reads))
@@ -275,6 +274,6 @@ done_winsock:
     WSACleanup();
 done:
     SecureZeroMemory(control_secret, sizeof(control_secret));
-    CloseHandle(battlenet);
+    CloseHandle(steam);
     return 0;
 }

@@ -55,14 +55,6 @@ static const char *forever_setting_permission_message(int result)
     assert(!result);
     return NULL;
 }
-static int forever_menu_set_wow_hdr(const char *share, const char *prefix, int enabled)
-{
-    (void)share;
-    (void)prefix;
-    (void)enabled;
-    assert(0);
-    return -EINVAL;
-}
 static void forever_say(const char *text) { (void)text; assert(0); }
 static void *forever_voice_download_worker(void *argument)
 {
@@ -78,7 +70,7 @@ static void *pw_forever_menu_remove(void *argument)
 }
 static void title_desktop_menu_status(const char *text, int terminal)
 {
-    assert(!terminal && !strcmp(text, "Closing Battle.net..."));
+    assert(!terminal && !strcmp(text, "Closing Steam..."));
     snprintf(status, sizeof(status), "%s", text);
 }
 static int pw_supervisor_quiesce_children(void)
@@ -157,7 +149,7 @@ static void test_exit(int error)
     assert(forever_title_menu_action(FOREVER_MENU_COMMAND_EXIT, 0) == -EBUSY);
     assert(forever_title_voice_enable() == -EBUSY && !setting_writes);
     assert(!created_worker(created_argument));
-    assert(!strcmp(status, "Closing Battle.net..."));
+    assert(!strcmp(status, "Closing Steam..."));
     assert(exit_requests == 1 && quiesces == 1 && ends == !!error);
     assert(forever_menu_operation == FOREVER_MENU_EXIT_READY);
 }
